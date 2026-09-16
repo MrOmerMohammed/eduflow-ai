@@ -1,8 +1,8 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
 body { font-family: Arial, Helvetica, sans-serif; background: #f6f8fb; color: #142033; }
-.shell { max-width: 1180px; margin: 0 auto; padding: 72px 24px; }
-.hero { padding: 52px; border: 1px solid #dfe5ee; border-radius: 28px; background: white; box-shadow: 0 18px 50px rgba(20, 32, 51, .08); }
+.shell { max-width: 1180px; margin: 0 auto; padding: 56px 24px; }
+.hero { padding: 44px; border: 1px solid #dfe5ee; border-radius: 28px; background: white; box-shadow: 0 18px 50px rgba(20, 32, 51, .08); }
 .eyebrow { margin: 0 0 14px; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #49637d; }
 h1 { max-width: 820px; margin: 0; font-size: clamp(42px, 7vw, 76px); line-height: .98; letter-spacing: -.045em; }
 .lead { max-width: 720px; margin: 24px 0 0; font-size: 19px; line-height: 1.6; color: #607086; }
@@ -12,4 +12,13 @@ h1 { max-width: 820px; margin: 0; font-size: clamp(42px, 7vw, 76px); line-height
 .dot { display: block; width: 9px; height: 9px; margin-bottom: 20px; border-radius: 50%; background: #49637d; }
 .card h2 { margin: 0 0 8px; font-size: 18px; }
 .card p { margin: 0; color: #6b7b90; line-height: 1.5; font-size: 14px; }
-@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } .hero { padding: 32px; } }
+.auth-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.auth-card { width: min(100%, 460px); padding: 40px; border: 1px solid #dfe5ee; border-radius: 24px; background: white; box-shadow: 0 18px 50px rgba(20, 32, 51, .08); }
+.auth-form { display: grid; gap: 16px; margin-top: 28px; }
+.auth-form label { display: grid; gap: 8px; font-size: 14px; font-weight: 700; }
+.auth-form input { width: 100%; padding: 12px 14px; border: 1px solid #cfd7e3; border-radius: 10px; font: inherit; }
+.auth-form button { padding: 13px 16px; border: 0; border-radius: 10px; background: #142033; color: white; font-weight: 700; cursor: pointer; }
+.auth-form button:disabled { opacity: .6; cursor: wait; }
+.error { margin: 0; color: #b42318; font-size: 14px; }
+.success { margin: 0; color: #17643d; font-size: 14px; }
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } .hero, .auth-card { padding: 32px; } }
