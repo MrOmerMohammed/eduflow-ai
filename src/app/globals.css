@@ -51,5 +51,20 @@ a { color: inherit; text-decoration: none; }
 .gateway-card > div:first-child { max-width: 700px; }
 .gateway-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px; border-radius: 14px; background: #f5f7fa; font-size: 12px; font-weight: 800; }
 .gateway-flow b { color: #98a4b2; }
-@media (max-width: 1000px) { .app-shell { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } .sidebar-footer { margin-top: 24px; } .metric-grid, .module-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 680px) { .dashboard { padding: 24px 18px 40px; } .topbar, .workspace-banner, .gateway-card { align-items: flex-start; flex-direction: column; } .metric-grid, .module-grid { grid-template-columns: 1fr; } .setup-title { font-size: 34px; } .auth-card { padding: 28px; } }
+.setup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0 28px; }
+.management-card, .setup-lists > article { padding: 22px; border: 1px solid #dfe5ee; border-radius: 18px; background: #fff; display: grid; gap: 12px; }
+.management-card h2 { margin: 0; font-size: 22px; }
+.management-card p { margin: 0; color: #6b7b90; font-size: 13px; line-height: 1.5; }
+.management-card input, .management-card select { width: 100%; padding: 11px 12px; border: 1px solid #cfd7e3; border-radius: 10px; font: inherit; background: #fff; }
+.management-card button { padding: 12px 14px; border: 0; border-radius: 10px; background: #142033; color: #fff; font-weight: 800; cursor: pointer; }
+.management-card button:disabled { opacity: .6; cursor: wait; }
+.two-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #607086; }
+.check input { width: auto; }
+.setup-message { grid-column: 1 / -1; margin: 0; padding: 12px 14px; border-radius: 10px; background: #edf8f2; color: #17643d; font-size: 13px; font-weight: 700; }
+.setup-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.list-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 12px 0; border-top: 1px solid #edf0f4; font-size: 13px; }
+.list-row span, .empty { color: #77879a; font-size: 12px; }
+.empty { margin: 0; }
+@media (max-width: 1000px) { .app-shell { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } .sidebar-footer { margin-top: 24px; } .metric-grid, .module-grid, .setup-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 680px) { .dashboard { padding: 24px 18px 40px; } .topbar, .workspace-banner, .gateway-card { align-items: flex-start; flex-direction: column; } .metric-grid, .module-grid, .setup-grid, .setup-lists { grid-template-columns: 1fr; } .setup-title { font-size: 34px; } .auth-card { padding: 28px; } }
