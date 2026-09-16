@@ -1,0 +1,15 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { font-family: Arial, Helvetica, sans-serif; background: #f6f8fb; color: #142033; }
+.shell { max-width: 1180px; margin: 0 auto; padding: 72px 24px; }
+.hero { padding: 52px; border: 1px solid #dfe5ee; border-radius: 28px; background: white; box-shadow: 0 18px 50px rgba(20, 32, 51, .08); }
+.eyebrow { margin: 0 0 14px; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #49637d; }
+h1 { max-width: 820px; margin: 0; font-size: clamp(42px, 7vw, 76px); line-height: .98; letter-spacing: -.045em; }
+.lead { max-width: 720px; margin: 24px 0 0; font-size: 19px; line-height: 1.6; color: #607086; }
+.status { display: inline-block; margin-top: 28px; padding: 10px 14px; border-radius: 999px; background: #edf8f2; color: #17643d; font-size: 13px; font-weight: 700; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.card { min-height: 150px; padding: 24px; border: 1px solid #dfe5ee; border-radius: 20px; background: white; }
+.dot { display: block; width: 9px; height: 9px; margin-bottom: 20px; border-radius: 50%; background: #49637d; }
+.card h2 { margin: 0 0 8px; font-size: 18px; }
+.card p { margin: 0; color: #6b7b90; line-height: 1.5; font-size: 14px; }
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } .hero { padding: 32px; } }
