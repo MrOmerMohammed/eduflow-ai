@@ -21,7 +21,12 @@ export type GatewayAction =
   | "finance.assignment.create"
   | "finance.invoice.create"
   | "finance.payment.record"
-  | "finance.balance.get";
+  | "finance.balance.get"
+  | "staff.create"
+  | "staff.list"
+  | "leave.type.create"
+  | "leave.request.create"
+  | "leave.request.status";
 
 export type GatewayRequest = {
   action: GatewayAction;
