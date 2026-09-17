@@ -14,7 +14,9 @@ export type GatewayAction =
   | "enrollment.create"
   | "attendance.roster"
   | "attendance.save"
-  | "attendance.student.summary";
+  | "attendance.student.summary"
+  | "exam.results.save"
+  | "exam.results.get";
 
 export type GatewayRequest = {
   action: GatewayAction;
