@@ -16,7 +16,12 @@ export type GatewayAction =
   | "attendance.save"
   | "attendance.student.summary"
   | "exam.results.save"
-  | "exam.results.get";
+  | "exam.results.get"
+  | "finance.structure.create"
+  | "finance.assignment.create"
+  | "finance.invoice.create"
+  | "finance.payment.record"
+  | "finance.balance.get";
 
 export type GatewayRequest = {
   action: GatewayAction;
