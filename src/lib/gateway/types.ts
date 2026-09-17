@@ -4,6 +4,7 @@ export type GatewayAction =
   | "academic_year.create"
   | "grade.create"
   | "section.create"
+  | "school.sections"
   | "student.search"
   | "student.get"
   | "student.create"
