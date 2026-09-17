@@ -14,7 +14,8 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
     .eq("status", "active");
   const requestedSchoolId = (await searchParams).schoolId;
   const membership = (memberships ?? []).find((item) => item.school_id === requestedSchoolId) ?? memberships?.[0];
-  if (!membership?.schools) redirect("/setup");
+  const school = Array.isArray(membership?.schools) ? membership.schools[0] : membership?.schools;
+  if (!membership?.school_id || !school) redirect("/setup");
 
-  return <StudentList schoolId={membership.school_id} school={membership.schools as { name: string; code: string }} />;
+  return <StudentList schoolId={membership.school_id} school={{ name: school.name, code: school.code }} />;
 }
