@@ -3,6 +3,15 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { optionalString, optionalUuid, stringValue, uuidValue, type GatewayRequest } from "@/lib/gateway/types";
 
+function safeError(error: unknown) {
+  const message = error instanceof Error ? error.message : "Gateway request failed";
+  if (/required|must be|valid UUID|text/i.test(message)) return message;
+  if (/Admission number already exists/i.test(message)) return "Admission number already exists in this school";
+  if (/already enrolled for this academic year/i.test(message)) return "Student is already enrolled for this academic year";
+  if (/not found|does not belong|not active|permission|access denied|unauthorized|forbidden/i.test(message)) return "The requested operation is not permitted";
+  return "Unable to complete the request. Please try again.";
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as GatewayRequest;
@@ -100,7 +109,7 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ error: "Unsupported gateway action" }, { status: 400 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Gateway request failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    console.error("Gateway request failed", error);
+    return NextResponse.json({ error: safeError(error) }, { status: 400 });
   }
 }
