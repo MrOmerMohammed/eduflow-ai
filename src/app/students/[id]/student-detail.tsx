@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 type Student = { id: string; admission_number: string; first_name: string; middle_name: string | null; last_name: string | null; date_of_birth: string | null; gender: string | null; email: string | null; phone: string | null; status: string; metadata: Record<string, unknown> };
 type Year = { id: string; name: string; start_date: string; end_date: string; is_current: boolean };
 type Grade = { id: string; name: string; code: string | null; sort_order: number };
 type Section = { id: string; name: string; capacity: number | null };
-
 type Props = { schoolId: string; studentId: string; academicYears: Year[]; grades: Grade[] };
 
 export default function StudentDetail({ schoolId, studentId, academicYears, grades }: Props) {
@@ -44,9 +43,9 @@ export default function StudentDetail({ schoolId, studentId, academicYears, grad
     const response = await fetch("/api/gateway", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, payload }) });
     const body = await response.json(); if (!response.ok) throw new Error(body.error || "Request failed"); return body.data;
   }
-  async function saveStudent(e: React.FormEvent) { e.preventDefault(); setSaving(true); setError(""); setMessage(""); try { await call("student.update", { schoolId, studentId, ...form }); await load(); setMessage("Student profile updated."); } catch (e) { setError(e instanceof Error ? e.message : "Unable to update student"); } finally { setSaving(false); } }
-  async function addGuardian(e: React.FormEvent) { e.preventDefault(); setSaving(true); setError(""); setMessage(""); try { const g = await call("guardian.create", { schoolId, ...guardian }); await call("student.guardian.link", { schoolId, studentId, guardianId: g.id, isPrimary: guardians.length === 0 }); setGuardian({ fullName: "", relationship: "", phone: "", email: "" }); await load(); setMessage("Guardian added and linked."); } catch (e) { setError(e instanceof Error ? e.message : "Unable to add guardian"); } finally { setSaving(false); } }
-  async function addEnrollment(e: React.FormEvent) { e.preventDefault(); setSaving(true); setError(""); setMessage(""); try { await call("enrollment.create", { schoolId, studentId, ...enroll, status: "active" }); await load(); setMessage("Enrollment created."); } catch (e) { setError(e instanceof Error ? e.message : "Unable to create enrollment"); } finally { setSaving(false); } }
+  async function saveStudent(e: FormEvent) { e.preventDefault(); setSaving(true); setError(""); setMessage(""); try { await call("student.update", { schoolId, studentId, ...form }); await load(); setMessage("Student profile updated."); } catch (e) { setError(e instanceof Error ? e.message : "Unable to update student"); } finally { setSaving(false); } }
+  async function addGuardian(e: FormEvent) { e.preventDefault(); setSaving(true); setError(""); setMessage(""); try { const g = await call("guardian.create", { schoolId, ...guardian }); await call("student.guardian.link", { schoolId, studentId, guardianId: g.id, isPrimary: guardians.length === 0 }); setGuardian({ fullName: "", relationship: "", phone: "", email: "" }); await load(); setMessage("Guardian added and linked."); } catch (e) { setError(e instanceof Error ? e.message : "Unable to add guardian"); } finally { setSaving(false); } }
+  async function addEnrollment(e: FormEvent) { e.preventDefault(); setSaving(true); setError(""); setMessage(""); try { await call("enrollment.create", { schoolId, studentId, ...enroll, status: "active" }); await load(); setMessage("Enrollment created."); } catch (e) { setError(e instanceof Error ? e.message : "Unable to create enrollment"); } finally { setSaving(false); } }
 
   if (!student) return <section className="student-table-card"><p className="empty">Loading student profile…</p></section>;
   const fullName = [student.first_name, student.middle_name, student.last_name].filter(Boolean).join(" ");
