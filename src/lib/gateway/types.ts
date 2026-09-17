@@ -11,7 +11,10 @@ export type GatewayAction =
   | "student.update"
   | "guardian.create"
   | "student.guardian.link"
-  | "enrollment.create";
+  | "enrollment.create"
+  | "attendance.roster"
+  | "attendance.save"
+  | "attendance.student.summary";
 
 export type GatewayRequest = {
   action: GatewayAction;
