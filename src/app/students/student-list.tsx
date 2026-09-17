@@ -57,7 +57,7 @@ export default function StudentList({ schoolId, school }: Props) {
         <p className="sidebar-label">Workspace</p>
         <nav className="side-nav">
           <Link href="/">Overview</Link>
-          <Link className="active" href="/students">Students</Link>
+          <Link className="active" href={`/students?schoolId=${schoolId}`}>Students</Link>
           <Link href="/school/setup">School setup</Link>
         </nav>
         <div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code}</span></div>
@@ -65,7 +65,7 @@ export default function StudentList({ schoolId, school }: Props) {
       <section className="dashboard">
         <header className="topbar">
           <div><p className="eyebrow">V3 · Student Information System</p><h1>Students</h1></div>
-          <Link className="primary-link" href="/students/new">+ Add student</Link>
+          <Link className="primary-link" href={`/students/new?schoolId=${schoolId}`}>+ Add student</Link>
         </header>
         <section className="workspace-banner">
           <div><span className="muted">Student registry</span><h2>{students.length} visible records</h2><p>Search by admission number or student name.</p></div>
@@ -94,7 +94,7 @@ export default function StudentList({ schoolId, school }: Props) {
                     <td>{[student.first_name, student.middle_name, student.last_name].filter(Boolean).join(" ")}</td>
                     <td><span className={`status-pill status-${student.status}`}>{student.status}</span></td>
                     <td>{student.phone || student.email || "—"}</td>
-                    <td><Link className="table-link" href={`/students/${student.id}`}>Open</Link></td>
+                    <td><Link className="table-link" href={`/students/${student.id}?schoolId=${schoolId}`}>Open</Link></td>
                   </tr>)}
                 </tbody>
               </table>
