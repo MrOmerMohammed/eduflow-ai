@@ -68,5 +68,18 @@ a { color: inherit; text-decoration: none; }
 .list-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 12px 0; border-top: 1px solid #edf0f4; font-size: 13px; }
 .list-row span, .empty { color: #77879a; font-size: 12px; }
 .empty { margin: 0; }
-@media (max-width: 1000px) { .app-shell { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } .sidebar-footer { margin-top: 24px; } .metric-grid, .module-grid, .setup-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 680px) { .dashboard { padding: 24px 18px 40px; } .topbar, .workspace-banner, .gateway-card { align-items: flex-start; flex-direction: column; } .metric-grid, .module-grid, .setup-grid, .setup-lists { grid-template-columns: 1fr; } .setup-title { font-size: 34px; } .auth-card { padding: 28px; } }
+.primary-link { display: inline-flex; align-items: center; justify-content: center; padding: 12px 16px; border: 0; border-radius: 10px; background: #142033; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.primary-link:disabled { opacity: .55; cursor: wait; }
+.student-toolbar { display: grid; grid-template-columns: 1fr 1fr 220px; gap: 10px; margin: 18px 0; }
+.student-toolbar input, .student-toolbar select { width: 100%; padding: 11px 12px; border: 1px solid #cfd7e3; border-radius: 10px; font: inherit; background: #fff; }
+.student-table-card { border: 1px solid #dfe5ee; border-radius: 18px; background: #fff; overflow: hidden; }
+.student-table-wrap { overflow-x: auto; }
+.student-table { width: 100%; border-collapse: collapse; min-width: 820px; }
+.student-table th, .student-table td { padding: 14px 16px; border-bottom: 1px solid #edf0f4; text-align: left; font-size: 13px; }
+.student-table th { color: #738196; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; background: #fafbfd; }
+.attendance-actions { display: flex; flex-wrap: wrap; gap: 5px; }
+.attendance-status { padding: 7px 9px; border: 1px solid #dfe5ee; border-radius: 8px; background: #fff; color: #607086; font-size: 11px; font-weight: 800; text-transform: capitalize; cursor: pointer; }
+.attendance-status:hover, .attendance-status.active { border-color: #142033; background: #142033; color: #fff; }
+.page-message { margin-top: 14px; }
+@media (max-width: 1000px) { .app-shell { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } .sidebar-footer { margin-top: 24px; } .metric-grid, .module-grid, .setup-grid { grid-template-columns: repeat(2, 1fr); } .student-toolbar { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 680px) { .dashboard { padding: 24px 18px 40px; } .topbar, .workspace-banner, .gateway-card { align-items: flex-start; flex-direction: column; } .metric-grid, .module-grid, .setup-grid, .setup-lists, .student-toolbar { grid-template-columns: 1fr; } .setup-title { font-size: 34px; } .auth-card { padding: 28px; } }
