@@ -68,6 +68,22 @@ export async function POST(request: Request) {
     }
 
     const admin = createSupabaseAdminClient();
+    if (body.action === "attendance.roster") {
+      const { data, error } = await admin.rpc("get_attendance_roster", { p_actor_user_id: userId, p_school_id: uuidValue(payload, "schoolId"), p_section_id: uuidValue(payload, "sectionId"), p_academic_year_id: uuidValue(payload, "academicYearId"), p_attendance_date: stringValue(payload, "attendanceDate") });
+      if (error) throw new Error(error.message);
+      return NextResponse.json({ data });
+    }
+    if (body.action === "attendance.save") {
+      if (!Array.isArray(payload.records)) throw new Error("records must be an array");
+      const { data, error } = await admin.rpc("save_attendance", { p_actor_user_id: userId, p_school_id: uuidValue(payload, "schoolId"), p_academic_year_id: uuidValue(payload, "academicYearId"), p_section_id: uuidValue(payload, "sectionId"), p_attendance_date: stringValue(payload, "attendanceDate"), p_records: payload.records, p_status: optionalString(payload, "status") ?? "submitted", p_notes: optionalString(payload, "notes") });
+      if (error) throw new Error(error.message);
+      return NextResponse.json({ data });
+    }
+    if (body.action === "attendance.student.summary") {
+      const { data, error } = await admin.rpc("get_student_attendance_summary", { p_actor_user_id: userId, p_school_id: uuidValue(payload, "schoolId"), p_student_id: uuidValue(payload, "studentId"), p_academic_year_id: uuidValue(payload, "academicYearId") });
+      if (error) throw new Error(error.message);
+      return NextResponse.json({ data });
+    }
     if (body.action === "workspace.bootstrap") {
       const { data, error } = await admin.rpc("bootstrap_school_workspace", { p_actor_user_id: userId, p_org_name: stringValue(payload, "organizationName"), p_school_name: stringValue(payload, "schoolName"), p_school_code: stringValue(payload, "schoolCode") });
       if (error) throw new Error(error.message); return NextResponse.json({ data });
