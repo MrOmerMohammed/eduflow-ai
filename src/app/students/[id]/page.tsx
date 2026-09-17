@@ -16,14 +16,14 @@ export default async function StudentDetailPage({ params, searchParams }: { para
     .eq("status", "active");
   const requestedSchoolId = (await searchParams).schoolId;
   const membership = (memberships ?? []).find((item) => item.school_id === requestedSchoolId) ?? memberships?.[0];
-  if (!membership?.schools) redirect("/setup");
+  const school = Array.isArray(membership?.schools) ? membership.schools[0] : membership?.schools;
+  if (!membership?.school_id || !school) redirect("/setup");
 
   const [{ data: years }, { data: grades }] = await Promise.all([
     supabase.from("academic_years").select("id, name, start_date, end_date, is_current").eq("school_id", membership.school_id).order("start_date", { ascending: false }),
     supabase.from("grades").select("id, name, code, sort_order").eq("school_id", membership.school_id).order("sort_order", { ascending: true }),
   ]);
 
-  const school = membership.schools as { id: string; name: string; code: string };
   return (
     <main className="app-shell">
       <aside className="sidebar">
