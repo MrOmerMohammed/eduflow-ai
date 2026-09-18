@@ -26,7 +26,10 @@ export type GatewayAction =
   | "staff.list"
   | "leave.type.create"
   | "leave.request.create"
-  | "leave.request.status";
+  | "leave.request.status"
+  | "communication.create"
+  | "communication.send"
+  | "communication.list";
 
 export type GatewayRequest = {
   action: GatewayAction;
