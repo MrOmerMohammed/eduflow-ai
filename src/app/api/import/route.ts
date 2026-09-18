@@ -35,9 +35,8 @@ export async function POST(request: Request) {
     if (file.size > 10 * 1024 * 1024) throw new Error("Workbook must be 10 MB or smaller");
     if (!/\.(xlsx|xlsm)$/i.test(file.name)) throw new Error("Only .xlsx or .xlsm workbooks are supported");
 
-    const buffer = Buffer.from(await file.arrayBuffer());
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
+    await workbook.xlsx.load(await file.arrayBuffer());
     const worksheet = workbook.worksheets[0];
     if (!worksheet) throw new Error("Workbook has no worksheets");
 
