@@ -60,7 +60,10 @@ export async function POST(request:Request){
     if(error) throw new Error(error.message); result=data;
   }
 
-  const {data:conversation,error:conversationError}=await admin.rpc("ai_create_conversation",{p_actor_user_id:userId,p_school_id:schoolId,p_title:message.slice(0,120)});\n  if(conversationError) throw new Error(conversationError.message);\n  const {error:messageError}=await admin.from("ai_messages").insert({conversation_id:conversation,role:"assistant",content:JSON.stringify({tool:toolSlug,result}),tool_name:toolSlug,tool_result:result});\n  if(messageError) throw new Error(messageError.message);
+  const {data:conversation,error:conversationError}=await admin.rpc("ai_create_conversation",{p_actor_user_id:userId,p_school_id:schoolId,p_title:message.slice(0,120)});
+  if(conversationError) throw new Error(conversationError.message);
+  const {error:messageError}=await admin.from("ai_messages").insert({conversation_id:conversation,role:"assistant",content:JSON.stringify({tool:toolSlug,result}),tool_name:toolSlug,tool_result:result});
+  if(messageError) throw new Error(messageError.message);
   return NextResponse.json({data:{status:"success",tool:toolSlug,result}});
  }catch(e){
   const message=e instanceof Error?e.message:"AI request failed";
