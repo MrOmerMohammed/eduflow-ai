@@ -34,7 +34,8 @@ export type GatewayAction =
   | "notification.read"
   | "notification.read_all"
   | "notification.preferences.get"
-  | "notification.preferences.set"\n  | "parent.dashboard";
+  | "notification.preferences.set"
+  | "parent.dashboard";
 
 export type GatewayRequest = {
   action: GatewayAction;
