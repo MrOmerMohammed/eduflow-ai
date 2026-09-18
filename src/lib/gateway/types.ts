@@ -29,7 +29,12 @@ export type GatewayAction =
   | "leave.request.status"
   | "communication.create"
   | "communication.send"
-  | "communication.list"\n  | "notification.list"\n  | "notification.read"\n  | "notification.read_all"\n  | "notification.preferences.get"\n  | "notification.preferences.set";
+  | "communication.list"
+  | "notification.list"
+  | "notification.read"
+  | "notification.read_all"
+  | "notification.preferences.get"
+  | "notification.preferences.set";
 
 export type GatewayRequest = {
   action: GatewayAction;
