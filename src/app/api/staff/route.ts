@@ -13,6 +13,8 @@ export async function POST(request: Request) {
     if (claimsError || !userId) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     const admin = createSupabaseAdminClient();
     const schoolId = uuidValue(payload, "schoolId");
+    const { data: membership, error: membershipError } = await supabase.from("school_memberships").select("school_id").eq("school_id", schoolId).eq("user_id", userId).eq("status", "active").maybeSingle();
+    if (membershipError || !membership) return NextResponse.json({ error: "The requested operation is not permitted" }, { status: 403 });
 
     if (body.action === "staff.list") {
       const { data, error } = await admin.rpc("get_staff", { p_actor_user_id: userId, p_school_id: schoolId, p_status: optionalString(payload, "status") });
@@ -42,7 +44,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ data });
     }
     if (body.action === "leave.type.list") {
-      const { data, error } = await admin.from("leave_types").select("id,name,code,annual_limit,is_paid,is_active").eq("school_id", schoolId).order("name");
+      const { data, error } = await supabase.from("leave_types").select("id,name,code,annual_limit,is_paid,is_active").eq("school_id", schoolId).order("name");
       if (error) throw new Error(error.message);
       return NextResponse.json({ data: data ?? [] });
     }
