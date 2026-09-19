@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import NotificationsBoard from "./notifications-board";
 
-export default async function NotificationsPage() {
+export default async function NotificationsPage({ searchParams }: { searchParams: Promise<{ schoolId?: string }> }) {
   const supabase = await createSupabaseServerClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   if (!claimsData?.claims?.sub) redirect("/auth/login");
@@ -12,7 +12,8 @@ export default async function NotificationsPage() {
     .select("school_id, status, schools(id, name, code, status)")
     .eq("user_id", userId)
     .eq("status", "active");
-  const membership = memberships?.[0] as any;
+  const requestedSchoolId = (await searchParams).schoolId;
+  const membership = ((memberships ?? []).find((item:any) => item.school_id === requestedSchoolId) ?? memberships?.[0]) as any;
   if (!membership?.schools) redirect("/setup");
   return <NotificationsBoard schoolId={membership.schools.id} schoolName={membership.schools.name} />;
 }
