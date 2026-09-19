@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Child = {
@@ -23,7 +24,20 @@ export default function ParentBoard({schoolId,schoolName}:{schoolId:string;schoo
   useEffect(()=>{void (async()=>{try{setData(await gateway("parent.dashboard",{schoolId}) as Dashboard);}catch(e){setError(e instanceof Error?e.message:"Unable to load parent portal");}finally{setLoading(false);}})();},[schoolId]);
   return <main className="app-shell">
     <aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Parent workspace</p>
-      <nav className="side-nav"><a href="/">Overview</a><a className="active" href={`/parent?schoolId=${schoolId}`}>Parent Portal</a><a href={`/notifications?schoolId=${schoolId}`}>Notifications</a><a href={`/communication?schoolId=${schoolId}`}>Communication</a></nav>
+      <nav className="side-nav"><Link href="/">Overview</Link>
+<Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
+<Link href={`/students?schoolId=${schoolId}`}>Students</Link>
+<Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
+<Link href={`/attendance?schoolId=${schoolId}`}>Attendance</Link>
+<Link href={`/exams?schoolId=${schoolId}`}>Exams</Link>
+<Link href={`/finance?schoolId=${schoolId}`}>Finance</Link>
+<Link href={`/hr?schoolId=${schoolId}`}>Staff & HR</Link>
+<Link href={`/communication?schoolId=${schoolId}`}>Communication</Link>
+<Link href={`/notifications?schoolId=${schoolId}`}>Notifications</Link>
+<Link className="active" href={`/parent?schoolId=${schoolId}`}>Parent Portal</Link>
+<Link href={`/import?schoolId=${schoolId}`}>Data Import</Link>
+<Link href={`/ai?schoolId=${schoolId}`}>AI Assistant</Link>
+<Link href="/school/setup">School setup</Link></nav>
       <div className="sidebar-footer"><strong>{schoolName}</strong><span>Parent Management</span></div>
     </aside>
     <section className="dashboard"><header className="topbar"><div><p className="eyebrow">V11 · Parent Management</p><h1>Parent Portal</h1></div><div className="user-chip"><span className="status-dot"/>{data?.children.length??0} linked child{data?.children.length===1?"":"ren"}</div></header>
