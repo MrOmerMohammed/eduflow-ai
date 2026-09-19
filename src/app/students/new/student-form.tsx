@@ -25,7 +25,7 @@ export default function StudentForm({ schoolId }: { schoolId: string }) {
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "Unable to create student");
-      router.push(`/students/${body.data.id}`);
+      router.push(`/students/${body.data.id}?schoolId=${schoolId}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to create student");
