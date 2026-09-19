@@ -16,7 +16,7 @@ export default function HRBoard({schoolId,school}:{schoolId:string;school:{name:
  useEffect(()=>{load()},[]);
  const run=async(action:string,payload:Record<string,unknown>,success:string)=>{setError("");setMessage("");try{await post(action,payload);setMessage(success);await load()}catch(e){setError(e instanceof Error?e.message:"Unable to complete request")}};
  return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav">
-<Link href="/">Overview</Link>
+<Link href={`/?schoolId=${schoolId}`}>Overview</Link>
 <Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
 <Link className="" href={`/students?schoolId=${schoolId}`}>Students</Link>
 <Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
