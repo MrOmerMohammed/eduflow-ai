@@ -56,10 +56,21 @@ export default function StudentList({ schoolId, school }: Props) {
         <div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div>
         <p className="sidebar-label">Workspace</p>
         <nav className="side-nav">
-          <Link href="/">Overview</Link>
-          <Link className="active" href={`/students?schoolId=${schoolId}`}>Students</Link>
-          <Link href="/school/setup">School setup</Link>
-        </nav>
+<Link href="/">Overview</Link>
+<Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
+<Link className="active" href={`/students?schoolId=${schoolId}`}>Students</Link>
+<Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
+<Link className="" href={`/attendance?schoolId=${schoolId}`}>Attendance</Link>
+<Link className="" href={`/exams?schoolId=${schoolId}`}>Exams</Link>
+<Link className="" href={`/finance?schoolId=${schoolId}`}>Finance</Link>
+<Link className="" href={`/hr?schoolId=${schoolId}`}>Staff & HR</Link>
+<Link href={`/communication?schoolId=${schoolId}`}>Communication</Link>
+<Link href={`/notifications?schoolId=${schoolId}`}>Notifications</Link>
+<Link href={`/parent?schoolId=${schoolId}`}>Parent Portal</Link>
+<Link href={`/import?schoolId=${schoolId}`}>Data Import</Link>
+<Link href={`/ai?schoolId=${schoolId}`}>AI Assistant</Link>
+<Link href="/school/setup">School setup</Link>
+</nav>
         <div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code}</span></div>
       </aside>
       <section className="dashboard">
