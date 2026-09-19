@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SetupForm } from "./setup-form";
+import SignOutButton from "@/components/sign-out-button";
 
 export default async function SetupPage() {
   const supabase = await createSupabaseServerClient();
@@ -20,7 +21,7 @@ export default async function SetupPage() {
         <p className="eyebrow">EduFlow AI · V2 School Management</p>
         <h1 className="setup-title">Create your school workspace.</h1>
         <p className="lead">Set up the organization and first school. V2 will use this workspace as the boundary for every ERP module.</p>
-        <SetupForm />
+        <SetupForm /><div style={{ marginTop: 16, textAlign: "center" }}><SignOutButton /></div>
       </section>
     </main>
   );
