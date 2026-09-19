@@ -55,7 +55,22 @@ export default function AttendanceBoard({ schoolId, school, years, sections }: P
   }
 
   return <main className="app-shell">
-    <aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav"><Link href="/">Overview</Link><Link href={`/students?schoolId=${schoolId}`}>Students</Link><Link className="active" href={`/attendance?schoolId=${schoolId}`}>Attendance</Link><Link href="/school/setup">School setup</Link></nav><div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code}</span></div></aside>
+    <aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav">
+<Link href="/">Overview</Link>
+<Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
+<Link className="" href={`/students?schoolId=${schoolId}`}>Students</Link>
+<Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
+<Link className="active" href={`/attendance?schoolId=${schoolId}`}>Attendance</Link>
+<Link className="" href={`/exams?schoolId=${schoolId}`}>Exams</Link>
+<Link className="" href={`/finance?schoolId=${schoolId}`}>Finance</Link>
+<Link className="" href={`/hr?schoolId=${schoolId}`}>Staff & HR</Link>
+<Link href={`/communication?schoolId=${schoolId}`}>Communication</Link>
+<Link href={`/notifications?schoolId=${schoolId}`}>Notifications</Link>
+<Link href={`/parent?schoolId=${schoolId}`}>Parent Portal</Link>
+<Link href={`/import?schoolId=${schoolId}`}>Data Import</Link>
+<Link href={`/ai?schoolId=${schoolId}`}>AI Assistant</Link>
+<Link href="/school/setup">School setup</Link>
+</nav><div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code}</span></div></aside>
     <section className="dashboard">
       <header className="topbar"><div><p className="eyebrow">V4 · Attendance</p><h1>Daily attendance</h1></div><button className="primary-link" onClick={save} disabled={saving || loading || rows.length === 0}>{saving ? "Saving…" : "Save attendance"}</button></header>
       <section className="workspace-banner"><div><span className="muted">Class roster</span><h2>{selectedSection?.gradeName} · {selectedSection?.name}</h2><p>Mark present, absent, late or excused for the selected date.</p></div><div className="workspace-badge">RBAC + audit</div></section>
