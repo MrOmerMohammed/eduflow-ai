@@ -10,7 +10,7 @@ export default function FinanceBoard({schoolId,school,years,grades}:Props){
  const post=async(action:string,payload:Record<string,unknown>)=>{const r=await fetch("/api/gateway",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,payload})});const b=await r.json();if(!r.ok)throw new Error(b.error||"Request failed");return b};
  async function createStructure(){setError("");setMessage("");try{const b=await post("finance.structure.create",{schoolId,academicYearId:yearId,name,feeType,frequency,amount:Number(amount),dueDay:dueDay?Number(dueDay):null,gradeId:gradeId||null});setStructureId(b.data);setMessage("Fee structure created successfully.")}catch(e){setError(e instanceof Error?e.message:"Unable to create fee structure")}}
  return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav">
-<Link href="/">Overview</Link>
+<Link href={`/?schoolId=${schoolId}`}>Overview</Link>
 <Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
 <Link className="" href={`/students?schoolId=${schoolId}`}>Students</Link>
 <Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
