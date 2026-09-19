@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Notification = {
@@ -96,12 +97,20 @@ export default function NotificationsBoard({ schoolId, schoolName }: { schoolId:
       <aside className="sidebar">
         <div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div>
         <p className="sidebar-label">Workspace</p>
-        <nav className="side-nav">
-          <a href="/">Overview</a><a href={`/students?schoolId=${schoolId}`}>Students</a>
-          <a href={`/attendance?schoolId=${schoolId}`}>Attendance</a><a href={`/exams?schoolId=${schoolId}`}>Exams</a>
-          <a href={`/finance?schoolId=${schoolId}`}>Finance</a><a href={`/hr?schoolId=${schoolId}`}>Staff & HR</a>
-          <a href={`/communication?schoolId=${schoolId}`}>Communication</a><a className="active" href={`/notifications?schoolId=${schoolId}`}>Notifications</a>
-        </nav>
+        <nav className="side-nav"><Link href="/">Overview</Link>
+<Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
+<Link href={`/students?schoolId=${schoolId}`}>Students</Link>
+<Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
+<Link href={`/attendance?schoolId=${schoolId}`}>Attendance</Link>
+<Link href={`/exams?schoolId=${schoolId}`}>Exams</Link>
+<Link href={`/finance?schoolId=${schoolId}`}>Finance</Link>
+<Link href={`/hr?schoolId=${schoolId}`}>Staff & HR</Link>
+<Link href={`/communication?schoolId=${schoolId}`}>Communication</Link>
+<Link className="active" href={`/notifications?schoolId=${schoolId}`}>Notifications</Link>
+<Link href={`/parent?schoolId=${schoolId}`}>Parent Portal</Link>
+<Link href={`/import?schoolId=${schoolId}`}>Data Import</Link>
+<Link href={`/ai?schoolId=${schoolId}`}>AI Assistant</Link>
+<Link href="/school/setup">School setup</Link></nav>
         <div className="sidebar-footer"><strong>{schoolName}</strong><span>Notification Center</span></div>
       </aside>
       <section className="dashboard">
