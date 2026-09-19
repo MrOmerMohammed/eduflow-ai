@@ -6,7 +6,7 @@ export default function CommunicationBoard({schoolId,school}:{schoolId:string;sc
  const [campaigns,setCampaigns]=useState<Campaign[]>([]); const [message,setMessage]=useState(""); const [error,setError]=useState("");
  const post=async(action:string,payload:Record<string,unknown>)=>{const r=await fetch("/api/gateway",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,payload})});const b=await r.json();if(!r.ok)throw new Error(b.error||"Request failed");return b};
  const load=async()=>{try{const b=await post("communication.list",{schoolId});setCampaigns(b.data??[])}catch(e){setError(e instanceof Error?e.message:"Unable to load communications")}};
- useEffect(()=>{load()},[]);
+ useEffect(()=>{void load()},[schoolId]);
  async function create(send:boolean){setError("");setMessage("");try{const b=await post("communication.create",{schoolId,title,body,channel,audienceType:audience});if(send){await post("communication.send",{schoolId,campaignId:b.data});setMessage("Communication sent successfully.")}else setMessage("Draft saved successfully.");setTitle("");setBody("");await load()}catch(e){setError(e instanceof Error?e.message:"Unable to complete communication")}}
  return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav"><Link href={`/?schoolId=${schoolId}`}>Overview</Link>
 <Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
