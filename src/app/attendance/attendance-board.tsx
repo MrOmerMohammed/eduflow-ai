@@ -8,11 +8,12 @@ type Section = { id: string; name: string; gradeName: string };
 type Row = { enrollment_id: string; student_id: string; admission_number: string; first_name: string; middle_name: string | null; last_name: string | null; roll_number: string | null; status: "present" | "absent" | "late" | "excused"; remarks: string | null };
 type Props = { schoolId: string; school: { name: string; code: string }; years: Year[]; sections: Section[] };
 const statuses = ["present", "absent", "late", "excused"] as const;
+function localDate() { const d = new Date(); const offset = d.getTimezoneOffset(); return new Date(d.getTime() - offset * 60000).toISOString().slice(0, 10); }
 
 export default function AttendanceBoard({ schoolId, school, years, sections }: Props) {
   const [yearId, setYearId] = useState(years.find((year) => year.is_current)?.id ?? years[0]?.id ?? "");
   const [sectionId, setSectionId] = useState(sections[0]?.id ?? "");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(localDate());
   const [rows, setRows] = useState<Row[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
