@@ -30,7 +30,7 @@ export default function AiBoard({schoolId,school}:{schoolId:string;school:{name:
  };
  const plan=data?.plan,steps=plan?.steps||[];
  return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">AI</p><nav className="side-nav">
-<Link href="/">Overview</Link>
+<Link href={`/?schoolId=${schoolId}`}>Overview</Link>
 <Link href={"/analytics?schoolId="+schoolId}>Analytics</Link>
 <Link href={"/students?schoolId="+schoolId}>Students</Link>
 <Link href={"/academic?schoolId="+schoolId}>Academic</Link>
