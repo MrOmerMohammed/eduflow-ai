@@ -56,7 +56,7 @@ export default function StudentList({ schoolId, school }: Props) {
         <div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div>
         <p className="sidebar-label">Workspace</p>
         <nav className="side-nav">
-<Link href="/">Overview</Link>
+<Link href={`/?schoolId=${schoolId}`}>Overview</Link>
 <Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
 <Link className="active" href={`/students?schoolId=${schoolId}`}>Students</Link>
 <Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
