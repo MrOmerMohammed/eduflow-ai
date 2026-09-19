@@ -29,7 +29,7 @@ export default async function StudentDetailPage({ params, searchParams }: { para
       <aside className="sidebar">
         <div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div>
         <p className="sidebar-label">Workspace</p>
-        <nav className="side-nav"><Link href="/">Overview</Link><Link className="active" href={`/students?schoolId=${membership.school_id}`}>Students</Link><Link href="/school/setup">School setup</Link></nav>
+        <nav className="side-nav"><Link href={`/?schoolId=${membership.school_id}`}>Overview</Link><Link href={`/analytics?schoolId=${membership.school_id}`}>Analytics</Link><Link className="active" href={`/students?schoolId=${membership.school_id}`}>Students</Link><Link href={`/academic?schoolId=${membership.school_id}`}>Academic</Link><Link href={`/attendance?schoolId=${membership.school_id}`}>Attendance</Link><Link href={`/exams?schoolId=${membership.school_id}`}>Exams</Link><Link href={`/finance?schoolId=${membership.school_id}`}>Finance</Link><Link href={`/hr?schoolId=${membership.school_id}`}>Staff & HR</Link><Link href={`/communication?schoolId=${membership.school_id}`}>Communication</Link><Link href={`/notifications?schoolId=${membership.school_id}`}>Notifications</Link><Link href={`/parent?schoolId=${membership.school_id}`}>Parent Portal</Link><Link href={`/import?schoolId=${membership.school_id}`}>Data Import</Link><Link href={`/ai?schoolId=${membership.school_id}`}>AI Assistant</Link><Link href="/school/setup">School setup</Link></nav>
         <div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code}</span></div>
       </aside>
       <section className="dashboard">
