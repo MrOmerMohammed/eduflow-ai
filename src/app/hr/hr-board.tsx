@@ -13,7 +13,7 @@ export default function HRBoard({schoolId,school}:{schoolId:string;school:{name:
  const [staffId,setStaffId]=useState(""); const [leaveTypeId,setLeaveTypeId]=useState(""); const [startDate,setStartDate]=useState(localDate()); const [endDate,setEndDate]=useState(localDate()); const [reason,setReason]=useState("");
  const post=async(action:string,payload:Record<string,unknown>)=>{const r=await fetch("/api/hr",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,payload})});const b=await r.json();if(!r.ok)throw new Error(b.error||"Request failed");return b};
  const load=async()=>{try{const [s,t,l]=await Promise.all([post("staff.list",{schoolId}),post("leave.types",{schoolId}),post("leave.requests",{schoolId})]);setStaff(s.data??[]);setTypes(t.data??[]);setRequests(l.data??[]);if(!staffId&&s.data?.[0])setStaffId(s.data[0].id);if(!leaveTypeId&&t.data?.[0])setLeaveTypeId(t.data[0].id)}catch(e){setError(e instanceof Error?e.message:"Unable to load HR data")}};
- useEffect(()=>{load()},[]);
+ useEffect(()=>{void load()},[schoolId]);
  const run=async(action:string,payload:Record<string,unknown>,success:string)=>{setError("");setMessage("");try{await post(action,payload);setMessage(success);await load()}catch(e){setError(e instanceof Error?e.message:"Unable to complete request")}};
  return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav">
 <Link href={`/?schoolId=${schoolId}`}>Overview</Link>
