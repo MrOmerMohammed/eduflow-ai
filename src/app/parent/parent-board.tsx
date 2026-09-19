@@ -24,7 +24,7 @@ export default function ParentBoard({schoolId,schoolName}:{schoolId:string;schoo
   useEffect(()=>{void (async()=>{try{setData(await gateway("parent.dashboard",{schoolId}) as Dashboard);}catch(e){setError(e instanceof Error?e.message:"Unable to load parent portal");}finally{setLoading(false);}})();},[schoolId]);
   return <main className="app-shell">
     <aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Parent workspace</p>
-      <nav className="side-nav"><Link href="/">Overview</Link>
+      <nav className="side-nav"><Link href={`/?schoolId=${schoolId}`}>Overview</Link>
 <Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
 <Link href={`/students?schoolId=${schoolId}`}>Students</Link>
 <Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
