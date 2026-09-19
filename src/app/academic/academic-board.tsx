@@ -13,7 +13,7 @@ export default function AcademicBoard({schoolId,school,grades,sections,subjects,
  async function createTimetable(){try{await call("timetable.entry.create",{sectionId,subjectId,dayOfWeek:Number(ttDay),periodNo:Number(ttPeriod),startsAt:ttStarts||null,endsAt:ttEnds||null,room:ttRoom||null});setMessage("Timetable entry created.");setTtStarts("");setTtEnds("");setTtRoom("");router.refresh();}catch(e){setError(e instanceof Error?e.message:"Unable to create timetable entry")}}
  async function createLesson(){try{await call("lesson.create",{sectionId,subjectId,curriculumUnitId:null,title,content:description,scheduledDate:date||null});setMessage("Lesson created.");setTitle("");router.refresh();}catch(e){setError(e instanceof Error?e.message:"Unable to create lesson")}}
  return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav">
-<Link href="/">Overview</Link>
+<Link href={`/?schoolId=${schoolId}`}>Overview</Link>
 <Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
 <Link className="" href={`/students?schoolId=${schoolId}`}>Students</Link>
 <Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
