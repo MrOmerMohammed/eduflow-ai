@@ -8,7 +8,7 @@ export default function CommunicationBoard({schoolId,school}:{schoolId:string;sc
  const load=async()=>{try{const b=await post("communication.list",{schoolId});setCampaigns(b.data??[])}catch(e){setError(e instanceof Error?e.message:"Unable to load communications")}};
  useEffect(()=>{load()},[]);
  async function create(send:boolean){setError("");setMessage("");try{const b=await post("communication.create",{schoolId,title,body,channel,audienceType:audience});if(send){await post("communication.send",{schoolId,campaignId:b.data});setMessage("Communication sent successfully.")}else setMessage("Draft saved successfully.");setTitle("");setBody("");await load()}catch(e){setError(e instanceof Error?e.message:"Unable to complete communication")}}
- return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav"><Link href="/">Overview</Link>
+ return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">Workspace</p><nav className="side-nav"><Link href={`/?schoolId=${schoolId}`}>Overview</Link>
 <Link href={`/analytics?schoolId=${schoolId}`}>Analytics</Link>
 <Link href={`/students?schoolId=${schoolId}`}>Students</Link>
 <Link href={`/academic?schoolId=${schoolId}`}>Academic</Link>
