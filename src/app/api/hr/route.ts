@@ -23,6 +23,8 @@ export async function POST(request: Request) {
     if (claimsError || !actorUserId) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     const schoolId = uuid(payload.schoolId, "schoolId");
     const admin = createSupabaseAdminClient();
+    const { data: membership, error: membershipError } = await supabase.from("school_memberships").select("school_id").eq("school_id", schoolId).eq("user_id", actorUserId).eq("status", "active").maybeSingle();
+    if (membershipError || !membership) return NextResponse.json({ error: "The requested operation is not permitted" }, { status: 403 });
 
     if (body.action === "staff.list") {
       const { data, error } = await admin.rpc("get_staff", { p_actor_user_id: actorUserId, p_school_id: schoolId, p_status: typeof payload.status === "string" && payload.status ? payload.status : null });
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ data });
     }
     if (body.action === "leave.types") {
-      const { data, error } = await admin.from("leave_types").select("id,name,code,annual_limit,is_paid,is_active").eq("school_id", schoolId).order("name");
+      const { data, error } = await supabase.from("leave_types").select("id,name,code,annual_limit,is_paid,is_active").eq("school_id", schoolId).order("name");
       if (error) throw new Error(error.message);
       return NextResponse.json({ data: data ?? [] });
     }
@@ -82,7 +84,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ data });
     }
     if (body.action === "leave.requests") {
-      const { data, error } = await admin.from("leave_requests").select("id,staff_id,leave_type_id,start_date,end_date,days,reason,status,approved_by,approved_at,created_at,staff_members(employee_number,first_name,last_name),leave_types(name,code,is_paid)").eq("school_id", schoolId).order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("leave_requests").select("id,staff_id,leave_type_id,start_date,end_date,days,reason,status,approved_by,approved_at,created_at,staff_members(employee_number,first_name,last_name),leave_types(name,code,is_paid)").eq("school_id", schoolId).order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
       return NextResponse.json({ data: data ?? [] });
     }
