@@ -8,8 +8,8 @@ export default async function SetupPage() {
   if (!claimsData?.claims?.sub) redirect("/auth/login");
 
   const { count } = await supabase
-    .from("organization_memberships")
-    .select("organization_id", { count: "exact", head: true })
+    .from("school_memberships")
+    .select("school_id", { count: "exact", head: true })
     .eq("user_id", String(claimsData.claims.sub));
 
   if (count && count > 0) redirect("/");
