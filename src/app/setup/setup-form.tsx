@@ -24,7 +24,7 @@ export function SetupForm() {
       setError(result.error ?? "Workspace setup failed");
       return;
     }
-    router.replace("/");
+    router.replace("/school/setup");
     router.refresh();
   }
 
