@@ -29,7 +29,7 @@ export default async function SchoolSetupPage({ searchParams }: { searchParams: 
       <div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code} · Administrator</span></div>
     </aside>
     <section className="dashboard setup-dashboard">
-      <header className="topbar"><div><p className="eyebrow">Administrator setup</p><h1>School setup</h1></div><div className="setup-header-actions"><a className="primary-link" href={`/import?schoolId=${school.id}`}>Create using CSV</a><div className="user-chip"><span className="status-dot"/>Admin</div></div></header>
+      <header className="topbar"><div><p className="eyebrow">Administrator setup</p><h1>School setup</h1></div><div className="setup-header-actions"><a className="primary-link" href={`/school/setup/csv?schoolId=${school.id}`}>Create using CSV</a><div className="user-chip"><span className="status-dot"/>Admin</div></div></header>
       <SchoolOnboarding schoolId={school.id} schoolName={school.name} initialAnswers={profile?.answers as any} initialStep={Number(profile?.current_step ?? 1)} />
     </section>
   </main>;
