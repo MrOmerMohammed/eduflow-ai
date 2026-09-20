@@ -47,12 +47,12 @@ export async function POST(request:Request){
 export async function PUT(request:Request){
  try{const supabase=await createSupabaseServerClient();const {data:claims,error}=await supabase.auth.getClaims();const actor=claims?.claims?.sub?String(claims.claims.sub):null;if(error||!actor)return NextResponse.json({error:"Authentication required"},{status:401});
   const {schoolId,rows,errors}=await load(request);if(errors.length)return NextResponse.json({error:"Fix validation errors before commit",errors:errors.slice(0,100)},{status:422});
-  const admin=createSupabaseAdminClient();const {data,error:importError}=await admin.rpc("import_school_setup",{p_actor_user_id:actor,p_school_id:schoolId,p_rows:rows});if(importError)throw new Error(importError.message);
+  const admin=createSupabaseAdminClient();const {data:created,error:importError}=await admin.rpc("import_school_setup",{p_actor_user_id:actor,p_school_id:schoolId,p_rows:rows});if(importError)throw new Error(importError.message);
   const teacherEmails=[...new Set(rows.map(r=>String(r.teacher_email??"").trim().toLowerCase()).filter(Boolean))];const invitations:{email:string;invited:boolean;error?:string}[]=[];
   for(const email of teacherEmails){try{const users=await admin.auth.admin.listUsers({page:1,perPage:1000});if(users.error)throw new Error(users.error.message);const existing=users.data.users.find(u=>u.email?.toLowerCase()===email);
    if(existing){const a=await admin.rpc("assign_school_role",{p_actor_user_id:actor,p_school_id:schoolId,p_target_user_id:existing.id,p_role_key:"teacher"});if(a.error)throw new Error(a.error.message);invitations.push({email,invited:false});}
    else{const invited=await admin.auth.admin.inviteUserByEmail(email,{data:{school_role:"teacher"}});if(invited.error)throw new Error(invited.error.message);if(invited.data.user?.id){const a=await admin.rpc("assign_school_role",{p_actor_user_id:actor,p_school_id:schoolId,p_target_user_id:invited.data.user.id,p_role_key:"teacher"});if(a.error)throw new Error(a.error.message);}invitations.push({email,invited:true});}
   }catch(e){invitations.push({email,invited:false,error:e instanceof Error?e.message:"Unable to assign teacher access"});}}
-  return NextResponse.json({data:{created:importError?null:importError,teacher_accounts:invitations,message:"School setup imported successfully."}});
+  return NextResponse.json({data:{created,teacher_accounts:invitations,message:"School setup imported successfully."}});
  }catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Unable to commit school import"},{status:400});}
 }
