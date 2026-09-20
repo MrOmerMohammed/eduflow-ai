@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import ExcelJS from "exceljs";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -7,7 +6,6 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 const REQUIRED=["academic_year","academic_year_start","academic_year_end","grade","section","admission_number","first_name"];
 const OPTIONAL=["grade_code","section_capacity","subject","subject_code","roll_number","date_of_birth","gender","student_email","student_phone","student_status","guardian_name","guardian_relationship","guardian_phone","guardian_email","guardian_primary","teacher_name","teacher_first_name","teacher_last_name","teacher_email","teacher_phone","teacher_employee_number","teacher_designation","teacher_department","teacher_employment_type","teacher_joining_date"];
 
-function cell(v:ExcelJS.CellValue){return v===null||v===undefined?"":String(v).trim();}
 function parseRows(workbook:ExcelJS.Workbook){
  const ws=workbook.worksheets[0]; if(!ws) throw new Error("CSV has no rows");
  const headers=(ws.getRow(1).values as ExcelJS.CellValue[]).map(v=>cell(v).toLowerCase().replace(/\s+/g,"_"));
@@ -17,10 +15,6 @@ function parseRows(workbook:ExcelJS.Workbook){
  const rows:Record<string,unknown>[]=[];
  ws.eachRow((row,n)=>{
    if(n===1)return;
-   const out:Record<string,unknown>={};
-   for(const h of [...REQUIRED,...OPTIONAL]) if(headers.includes(h)) out[h]=cell(row.getCell(col(h)).value);
-   if(Object.values(out).every(v=>v==="")) return;
-   rows.push(out);
  });
  if(!rows.length) throw new Error("No data rows were found");
  if(rows.length>10000) throw new Error("CSV exceeds the 10,000-row safety limit");
@@ -36,7 +30,7 @@ function parseRows(workbook:ExcelJS.Workbook){
    if(r.academic_year_end && Number.isNaN(Date.parse(String(r.academic_year_end)))) errors.push(`Row ${line}: invalid academic_year_end`);
    if(r.teacher_email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(r.teacher_email))) errors.push(`Row ${line}: invalid teacher_email`);
  });
- return {rows,errors,worksheet:ws.name,headers};
+ return {rows,errors,worksheet:"CSV",headers};
 }
 
 async function load(request:Request){
@@ -45,8 +39,8 @@ async function load(request:Request){
  if(!UUID.test(schoolId)) throw new Error("schoolId must be a valid UUID");
  if(file.size>10*1024*1024) throw new Error("CSV must be 10 MB or smaller");
  if(!/\.csv$/i.test(file.name)) throw new Error("Only .csv files are supported");
- const workbook=new ExcelJS.Workbook(); await workbook.csv.load(Buffer.from(await file.arrayBuffer()).toString("utf8"));
- return {form,schoolId,file,workbook,...parseRows(workbook)};
+ const text=Buffer.from(await file.arrayBuffer()).toString("utf8").replace(/^\\uFEFF/,"");
+ return {form,schoolId,file,...parseRows(text)};
 }
 
 export async function POST(request:Request){
