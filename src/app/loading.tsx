@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="app-loading" aria-live="polite"><div className="loading-card"><span className="loading-mark">E</span><strong>Loading EduFlow AI</strong><p>Preparing your secure school workspace…</p><div className="loading-bar"><span/></div></div></main>;}
