@@ -12,5 +12,5 @@ export default async function HRPage({ searchParams }: { searchParams: Promise<{
   const membership = (memberships ?? []).find((m) => m.school_id === requested) ?? memberships?.[0];
   const school = Array.isArray(membership?.schools) ? membership.schools[0] : membership?.schools;
   if (!membership?.school_id || !school) redirect("/setup");
-  return <HRBoard schoolId={membership.school_id} school={{ name: school.name, code: school.code }} />;
+  return <HRBoard schoolId={membership.school_id} role={membership.role} school={{ name: school.name, code: school.code }} />;
 }
