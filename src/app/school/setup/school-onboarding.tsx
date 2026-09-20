@@ -53,7 +53,7 @@ export function SchoolOnboarding({schoolId,schoolName,initialAnswers}:{schoolId:
         }))
       : defaults.gradeConfigs,
   };
-  const [step,setStep]=useState(Math.max(1,Math.min(8,Number((initial as Partial<Answers>).currentStep ?? 1))));
+  const [step,setStep]=useState(Math.max(1,Math.min(8,Number((initial as Partial<Answers> & { currentStep?: number }).currentStep ?? 1))));
 
   const [answers,setAnswers]=useState<Answers>(merged);
   const [busy,setBusy]=useState(false);
