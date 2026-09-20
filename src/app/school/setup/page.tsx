@@ -30,7 +30,7 @@ export default async function SchoolSetupPage({ searchParams }: { searchParams: 
     </aside>
     <section className="dashboard setup-dashboard">
       <header className="topbar"><div><p className="eyebrow">Administrator setup</p><h1>School setup</h1></div><div className="user-chip"><span className="status-dot"/>Admin</div></header>
-      <SchoolOnboarding schoolId={school.id} schoolName={school.name} initialAnswers={profile?.answers as any} />
+      <SchoolOnboarding schoolId={school.id} schoolName={school.name} initialAnswers={profile?.answers as any} initialStep={Number(profile?.current_step ?? 1)} />
     </section>
   </main>;
 }
