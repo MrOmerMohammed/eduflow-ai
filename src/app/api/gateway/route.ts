@@ -78,15 +78,19 @@ if(body.action==="school.onboarding.save"){
   const academicYear=typeof answers.academicYear==="string"?answers.academicYear.trim():"";
   if(currentStep>=2 && !academicYear) throw new Error("Academic year is required");
 
-  const gradeConfigs=Array.isArray(answers.gradeConfigs)?answers.gradeConfigs:[];
+  const gradeConfigs: unknown[]=Array.isArray(answers.gradeConfigs)?answers.gradeConfigs:[];
   if(currentStep>=3){
     if(!Number.isInteger(Number(answers.gradeCount))||Number(answers.gradeCount)<1||Number(answers.gradeCount)>20) throw new Error("Number of grades must be between 1 and 20");
     if(gradeConfigs.length!==Number(answers.gradeCount)) throw new Error("Please configure every grade");
-    const gradeNames=gradeConfigs.map((g)=>g&&typeof g==="object"&&typeof (g as Record<string,unknown>).name==="string"?(g as Record<string,unknown>).name.trim().toLowerCase():"");
-    if(gradeNames.some((name)=>!name)) throw new Error("Every grade must have a name");
+    const gradeNames:string[]=gradeConfigs.map((grade:unknown)=>{
+      if(!grade || typeof grade!=="object") return "";
+      const name=(grade as {name?:unknown}).name;
+      return typeof name==="string"?name.trim().toLowerCase():"";
+    });
+    if(gradeNames.some((name:string)=>!name)) throw new Error("Every grade must have a name");
     if(new Set(gradeNames).size!==gradeNames.length) throw new Error("Grade names must be unique");
     for(const grade of gradeConfigs){
-      const g=grade as Record<string,unknown>;
+      const g=grade && typeof grade==="object"?grade as {sections?:unknown;students?:unknown}:{};
       const sections=Number(g.sections),students=Number(g.students);
       if(!Number.isInteger(sections)||sections<1||sections>20) throw new Error("Each grade must have between 1 and 20 sections");
       if(!Number.isInteger(students)||students<1) throw new Error("Students per section must be at least 1");
