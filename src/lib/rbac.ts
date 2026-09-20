@@ -12,7 +12,6 @@ export const SCHOOL_NAV = [
   { href: "/communication", label: "Communication", roles: ["admin","teacher","staff"] },
   { href: "/notifications", label: "Notifications", roles: ["admin","teacher","staff"] },
   { href: "/parent", label: "Parent Portal", roles: ["admin"] },
-  { href: "/import", label: "Data Import", roles: ["admin"] },
   { href: "/ai", label: "AI Assistant", roles: ["admin","teacher"] },
   { href: "/school/setup", label: "School setup", roles: ["admin"] },
 ] as const;
