@@ -38,7 +38,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   const school = membership.schools;
   const role = normalizeSchoolRole(membership.role);
-  const nav = SCHOOL_NAV.filter((item) => item.roles.includes(role)).map((item) => ({
+  const nav = SCHOOL_NAV.filter((item) => (item.roles as readonly string[]).includes(role)).map((item) => ({
     ...item,
     href: `${item.href}?schoolId=${school.id}`,
   }));
