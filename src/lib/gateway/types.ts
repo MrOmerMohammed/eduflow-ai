@@ -42,7 +42,8 @@ export type GatewayAction =
   | "notification.preferences.get"
   | "notification.preferences.set"
   | "parent.dashboard"
-  | "data.import.commit";
+  | "data.import.commit"
+  | "school.role.assign";
 
 export type GatewayRequest = {
   action: GatewayAction;
