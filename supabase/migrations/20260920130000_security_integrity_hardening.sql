@@ -25,3 +25,10 @@ $function$;
 -- * timetable day/period/time values must be valid
 -- * fee assignment enrollment and fee structure must use the same academic year
 -- * invoice payment locks the invoice row before calculating outstanding balance
+
+
+-- Performance hardening.
+drop policy if exists school_onboarding_admin_select on public.school_onboarding_profiles;
+create policy school_onboarding_admin_select on public.school_onboarding_profiles for select to authenticated
+using (exists (select 1 from public.school_memberships sm where sm.school_id=school_onboarding_profiles.school_id and sm.user_id=(select auth.uid()) and sm.status='active' and sm.role='admin'));
+create index if not exists school_database_provisioning_organization_id_idx on public.school_database_provisioning(organization_id);
