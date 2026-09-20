@@ -1,0 +1,2 @@
+"use client";
+export default function GlobalError({error,reset}:{error:Error&{digest?:string};reset:()=>void}){return <main className="app-loading"><section className="error-card"><p className="eyebrow">EduFlow AI</p><h1>Something went wrong</h1><p>We could not complete this screen. Your school data has not been intentionally changed.</p><div><button className="primary-button" onClick={()=>reset()}>Try again</button><a className="secondary-button" href="/">Return to dashboard</a></div></section></main>;}
