@@ -1,0 +1,9 @@
+-- Security and data-integrity hardening applied 2026-09-20.
+-- Applied directly to the live Supabase project; kept here for schema synchronization.
+--
+-- Fixes:
+-- 1. Permission checks require an active school_memberships row.
+-- 2. Exam creation/result entry validates academic-year ownership.
+-- 3. Timetable entries validate teacher membership and time/day ranges.
+-- 4. Finance fee assignments match enrollment academic year.
+-- 5. Fee payments lock the invoice row to prevent concurrent overpayment.
