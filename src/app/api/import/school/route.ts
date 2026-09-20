@@ -17,6 +17,18 @@ function parseCsv(text:string){
  if(value!==""||row.length){row.push(value.trim());if(row.some(v=>v!==''))records.push(row);}
  return records;
 }
+function normalizeEmploymentType(value: unknown): string {
+ const raw=String(value ?? "").trim().toLowerCase().replace(/[-\\s]+/g,"_");
+ if(!raw) return "full_time";
+ const aliases:Record<string,string>={
+  full_time:"full_time",fulltime:"full_time",full:"full_time",
+  part_time:"part_time",parttime:"part_time",part:"part_time",
+  contract:"contract",contractor:"contract",
+  temporary:"temporary",temp:"temporary",
+  intern:"intern",internship:"intern"
+ };
+ return aliases[raw] ?? "";
+}
 function parseRows(text:string){
  const records=parseCsv(text); if(!records.length) throw new Error("CSV has no rows");
  const headers=records[0].map(v=>v.toLowerCase().replace(/\s+/g,"_"));
@@ -34,6 +46,7 @@ function parseRows(text:string){
   }
   for(const h of ["date_of_birth","academic_year_start","academic_year_end","teacher_joining_date"]) if(r[h]&&Number.isNaN(Date.parse(String(r[h])))) errors.push(`Row ${line}: invalid ${h}`);
   if(r.teacher_email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(r.teacher_email))) errors.push(`Row ${line}: invalid teacher_email`);
+  if(r.teacher_employment_type){ const normalized=normalizeEmploymentType(r.teacher_employment_type); if(!normalized) errors.push(`Row ${line}: teacher_employment_type must be Full Time, Part Time, Contract, Temporary, or Intern`); else r.teacher_employment_type=normalized; }
  });
  return {rows,errors,headers};
 }
