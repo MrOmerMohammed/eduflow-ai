@@ -41,8 +41,20 @@ async function save(schoolId:string,status:string,currentStep:number,answers:Ans
 
 export function SchoolOnboarding({schoolId,schoolName,initialAnswers}:{schoolId:string;schoolName:string;initialAnswers?:Partial<Answers>|null}){
   const router=useRouter();
-  const merged={...defaults,...(initialAnswers??{})} as Answers;
-  const [step,setStep]=useState(1);
+  const initial = initialAnswers ?? {};
+  const merged: Answers = {
+    ...defaults,
+    ...initial,
+    gradeConfigs: Array.isArray(initial.gradeConfigs) && initial.gradeConfigs.length
+      ? initial.gradeConfigs.map((g) => ({
+          name: String(g?.name ?? "").trim(),
+          sections: Math.max(1, Number(g?.sections ?? 1)),
+          students: Math.max(1, Number(g?.students ?? 1)),
+        }))
+      : defaults.gradeConfigs,
+  };
+  const [step,setStep]=useState(Math.max(1,Math.min(8,Number((initial as Partial<Answers>).currentStep ?? 1))));
+
   const [answers,setAnswers]=useState<Answers>(merged);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
@@ -57,21 +69,55 @@ export function SchoolOnboarding({schoolId,schoolName,initialAnswers}:{schoolId:
     update("gradeCount",count); update("gradeConfigs",configs);
   }
 
+  function validateStep(){
+    if(step===1){
+      if(!answers.schoolType || !answers.board || !answers.medium) return "Please complete the school profile.";
+    }
+    if(step===2){
+      if(!answers.academicYear.trim()) return "Academic year is required.";
+    }
+    if(step===3){
+      if(!Number.isInteger(answers.gradeCount) || answers.gradeCount<1 || answers.gradeCount>20) return "Choose between 1 and 20 grades.";
+      if(answers.gradeConfigs.length!==answers.gradeCount) return "Please configure every grade.";
+      const names=answers.gradeConfigs.map((g)=>g.name.trim().toLowerCase());
+      if(names.some((name)=>!name)) return "Every grade must have a name.";
+      if(new Set(names).size!==names.length) return "Grade names must be unique.";
+      if(answers.gradeConfigs.some((g)=>!Number.isInteger(g.sections)||g.sections<1||g.sections>20)) return "Each grade must have between 1 and 20 sections.";
+      if(answers.gradeConfigs.some((g)=>!Number.isInteger(g.students)||g.students<1)) return "Students per section must be at least 1.";
+    }
+    if(step===4 && (!Number.isInteger(answers.studentCount)||answers.studentCount<0)) return "Student count must be zero or greater.";
+    if(step===5){
+      if([answers.staffCount,answers.teacherCount,answers.adminStaffCount].some((value)=>!Number.isInteger(value)||value<0)) return "Staff counts must be zero or greater.";
+      if(answers.teacherCount+answers.adminStaffCount>answers.staffCount) return "Teachers and administrative staff cannot exceed total staff.";
+    }
+    if(step===6){
+      if(!["daily","period","both"].includes(answers.attendanceMode)) return "Choose a valid attendance mode.";
+      if(!["term","monthly","both"].includes(answers.examMode)) return "Choose a valid exam mode.";
+      if(!["monthly","term","annual","mixed"].includes(answers.feeMode)) return "Choose a valid fee mode.";
+    }
+    return "";
+  }
+
   async function next(){
     setError(""); setBusy(true); setSaved(false);
+    const validationError=validateStep();
+    if(validationError){setError(validationError);setBusy(false);return;}
     try{
-      await save(schoolId,step===8?"completed":"in_progress",Math.min(step+1,8),answers);
+      await save(schoolId,step===8?"completed": "in_progress",Math.min(step+1,8),answers);
       if(step===8){router.replace("/?schoolId="+schoolId);router.refresh();return;}
       setStep(step+1);setSaved(true);
-    }catch(e){setError(e instanceof Error?e.message:"Unable to save");}
+    }catch(e){setError(e instanceof Error?e.message:"Unable to save your setup. Please try again.");}
     finally{setBusy(false);}
   }
 
   async function back(){
     if(step===1)return;
     setError("");setBusy(true);
-    try{await save(schoolId,"in_progress",step-1,answers);setStep(step-1);}
-    catch(e){setError(e instanceof Error?e.message:"Unable to save");}
+    try{
+      await save(schoolId,"in_progress",step-1,answers);
+      setStep(step-1);
+      setSaved(true);
+    }catch(e){setError(e instanceof Error?e.message:"Unable to save your setup. Please try again.");}
     finally{setBusy(false);}
   }
 
