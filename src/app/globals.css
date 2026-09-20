@@ -472,3 +472,20 @@ button:not(.primary-link):disabled { opacity:.55; }
   .marketing-price-card.featured { transform:none; }
   .marketing-pricing-head { align-items:flex-start; flex-direction:column; }
 }
+
+
+/* Setup creation choices */
+.setup-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.setup-choice{display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--line);border-radius:16px;background:#fbfcfe;color:var(--ink);transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease,background .18s ease}
+.setup-choice:hover{border-color:#aebbd0;background:#fff;transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.setup-choice.selected{border-color:#3157d5;background:#f5f7ff;box-shadow:0 0 0 3px rgba(49,87,213,.07)}
+.setup-choice-icon{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:11px;background:#edf2ff;color:#3157d5;font-size:10px;font-weight:900}
+.setup-choice strong,.setup-choice small{display:block}
+.setup-choice strong{font-size:13px}
+.setup-choice small{margin-top:5px;color:var(--muted);font-size:11px;line-height:1.45}
+.setup-section-label{margin:26px 0 0;color:#7a899b;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.setup-csv-card{width:min(100%,680px)}
+.setup-csv-card .setup-form{margin-top:22px}
+.setup-csv-card .secondary-button{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:12px 16px;border:1px solid var(--line-strong);border-radius:12px;background:#fff;color:var(--ink);font:inherit;font-weight:800}
+.setup-csv-card .secondary-button:hover{border-color:#aebbd0;background:#fbfcfe}
+@media(max-width:680px){.setup-choice-grid{grid-template-columns:1fr}}
