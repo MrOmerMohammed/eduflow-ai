@@ -100,7 +100,7 @@ function MarketingHome() {
     </section>
 
     <section className="marketing-bottom">
-      <div><p className="eyebrow">Ready to see it in action?</p><h2>Build your school's workspace and explore EduFlow AI.</h2><p>Create a trial workspace, load your demo or school data, and experience the role-based school management workflow.</p><div className="hero-actions"><a className="primary-link" href="/auth/sign-up">Try EduFlow AI free →</a><a className="secondary-link dark-secondary" href="/pricing">View pricing</a></div></div>
+      <div><p className="eyebrow">Ready to see it in action?</p><h2>Build your school's workspace and explore EduFlow AI.</h2><p>Create a trial workspace, load your school data, and experience the role-based school management workflow.</p><div className="hero-actions"><a className="primary-link" href="/auth/sign-up">Try EduFlow AI free →</a><a className="secondary-link dark-secondary" href="/pricing">View pricing</a></div></div>
     </section>
 
     <footer className="marketing-footer"><span>© {new Date().getFullYear()} EduFlow AI</span><div><a href="/pricing">Pricing</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/security">Security</a><a href="/auth/login">Sign in</a></div></footer>
