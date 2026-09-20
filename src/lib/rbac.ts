@@ -17,8 +17,9 @@ export const SCHOOL_NAV = [
   { href: "/school/setup", label: "School setup", roles: ["admin"] },
 ] as const;
 
-export function normalizeSchoolRole(value: unknown): SchoolRole {
-  return value === "teacher" || value === "staff" ? value : "admin";
+export function normalizeSchoolRole(value: unknown): SchoolRole | null {
+  if (value === "admin" || value === "teacher" || value === "staff") return value;
+  return null;
 }
 
 export function allowedRolesForPath(pathname: string): SchoolRole[] {
