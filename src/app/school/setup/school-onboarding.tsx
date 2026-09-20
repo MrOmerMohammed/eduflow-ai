@@ -31,9 +31,7 @@ const defaults: Answers = {
 };
 
 async function save(schoolId:string,status:string,currentStep:number,answers:Answers){
-  const response=await fetch("/api/gateway",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-    action:"school.onboarding.save",payload:{schoolId,status,currentStep,answers}
-  })});
+  const response=await fetch("/api/school/onboarding",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({schoolId,status,currentStep,answers})});
   const result=await response.json();
   if(!response.ok) throw new Error(result.error??"Unable to save school setup");
   return result;
