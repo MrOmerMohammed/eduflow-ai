@@ -1,48 +1,126 @@
 "use client";
+
 import Link from "next/link";
-import {useState} from "react";
+import { useMemo, useState } from "react";
+import { SCHOOL_NAV } from "@/lib/rbac";
 
 type Tool={name?:string;slug?:string;risk_level?:string;handler_key?:string};
 type PlanStep={order?:number;intent?:string;tool?:Tool;authorization?:{allowed?:boolean;reason?:string}};
 type Plan={run_id?:string;status?:string;intent?:string;tool?:Tool;authorization?:{allowed?:boolean;reason?:string};input?:{request?:string};steps?:PlanStep[];reused?:boolean};
-type ResponseData={ok?:boolean;plan?:Plan;result?:unknown;steps?:{order?:number;tool?:string;result?:unknown;error?:string}[];error?:string;conversationId?:string};
-type ChatItem={role:"user"|"assistant";content:string};
+type StepResult={order?:number;tool?:string;result?:unknown;error?:string};
+type ResponseData={ok?:boolean;plan?:Plan;result?:unknown;steps?:StepResult[];error?:string;conversationId?:string};
+type ChatItem={role:"user"|"assistant";content:string;time:string};
 
-export default function AiBoard({schoolId,school}:{schoolId:string;school:{name:string;code:string}}){
+function formatValue(value:unknown):string{
+  if(value===null||value===undefined)return "No data";
+  if(typeof value==="string")return value;
+  if(typeof value==="number"||typeof value==="boolean")return String(value);
+  return JSON.stringify(value,null,2);
+}
+
+function ResultView({value}:{value:unknown}){
+  if(Array.isArray(value)){
+    if(value.length===0)return <div className="ai-empty-result"><span>0</span><div><strong>No matching records</strong><p>The request executed successfully, but no records matched the search.</p></div></div>;
+    const objects=value.filter(v=>v&&typeof v==="object"&&!Array.isArray(v)) as Record<string,unknown>[];
+    if(objects.length===value.length){
+      const keys=Array.from(new Set(objects.flatMap(o=>Object.keys(o)))).slice(0,7);
+      return <div className="ai-result-table"><div className="ai-table-scroll"><table><thead><tr>{keys.map(k=><th key={k}>{k.replaceAll("_"," ")}</th>)}</tr></thead><tbody>{objects.map((row,i)=><tr key={i}>{keys.map(k=><td key={k}>{formatValue(row[k])}</td>)}</tr>)}</tbody></table></div></div>;
+    }
+  }
+  if(value&&typeof value==="object")return <div className="ai-object-grid">{Object.entries(value as Record<string,unknown>).slice(0,12).map(([k,v])=><div key={k}><span>{k.replaceAll("_"," ")}</span><strong>{formatValue(v)}</strong></div>)}</div>;
+  return <div className="ai-text-result">{formatValue(value)}</div>;
+}
+
+function toolLabel(step:PlanStep|StepResult){
+  const tool="tool" in step?step.tool:undefined;
+  return typeof tool==="string"?tool:tool?.name||tool?.slug||"AI operation";
+}
+
+export default function AiBoard({schoolId,school,role="admin"}:{schoolId:string;school:{name:string;code:string};role?:string}){
  const [message,setMessage]=useState("");
  const [loading,setLoading]=useState(false);
  const [data,setData]=useState<ResponseData|null>(null);
  const [error,setError]=useState("");
  const [conversationId,setConversationId]=useState<string|null>(null);
  const [history,setHistory]=useState<ChatItem[]>([]);
+ const [showPlan,setShowPlan]=useState(false);
+
+ const nav=SCHOOL_NAV.filter(item=>(item.roles as readonly string[]).includes(role));
+ const plan=data?.plan;
+ const steps=plan?.steps||[];
+ const lastResult=useMemo(()=>data?.steps?.find(s=>s.result!==undefined)||null,[data]);
+
  const ask=async()=>{
-  const text=message.trim();if(!text)return;
-  setLoading(true);setError("");
+  const request=message.trim();if(!request||loading)return;
+  setLoading(true);setError("");setShowPlan(false);
+  const now=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  setHistory(h=>[...h,{role:"user",content:request,time:now}]);
   try{
-   const r=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({schoolId,message:text,conversationId,idempotencyKey:crypto.randomUUID()})});
-   const b=await r.json();if(!r.ok)throw new Error(b.error||"AI request failed");
+   const r=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({schoolId,message:request,conversationId,idempotencyKey:crypto.randomUUID()})});
+   const b=await r.json() as ResponseData;
+   if(!r.ok)throw new Error(b.error||"AI request failed");
    setData(b);
    if(b.conversationId)setConversationId(b.conversationId);
-   const reply=b.error||((b.result!==undefined)?JSON.stringify(b.result):b.plan?.authorization?.reason||("Planned: "+(b.plan?.intent||"request")));
-   setHistory(h=>[...h,{role:"user",content:text},{role:"assistant",content:reply}]);
+   const reply=b.error||"Request completed. Review the result below.";
+   setHistory(h=>[...h,{role:"assistant",content:reply,time:now}]);
    setMessage("");
-  }catch(e){setError(e instanceof Error?e.message:"AI request failed")}finally{setLoading(false)}
+  }catch(e){
+   const msg=e instanceof Error?e.message:"AI request failed";
+   setError(msg);
+   setHistory(h=>[...h,{role:"assistant",content:msg,time:now}]);
+  }finally{setLoading(false)}
  };
- const plan=data?.plan,steps=plan?.steps||[];
- return <main className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div><p className="sidebar-label">AI</p><nav className="side-nav">
-<Link href={`/?schoolId=${schoolId}`}>Overview</Link>
-<Link href={"/analytics?schoolId="+schoolId}>Analytics</Link>
-<Link href={"/students?schoolId="+schoolId}>Students</Link>
-<Link href={"/academic?schoolId="+schoolId}>Academic</Link>
-<Link href={"/attendance?schoolId="+schoolId}>Attendance</Link>
-<Link href={"/exams?schoolId="+schoolId}>Exams</Link>
-<Link href={"/finance?schoolId="+schoolId}>Finance</Link>
-<Link href={"/hr?schoolId="+schoolId}>Staff & HR</Link>
-<Link href={"/communication?schoolId="+schoolId}>Communication</Link>
-<Link href={"/notifications?schoolId="+schoolId}>Notifications</Link>
-<Link href={"/parent?schoolId="+schoolId}>Parent Portal</Link>
-<Link href={"/import?schoolId="+schoolId}>Data Import</Link>
-<Link className="active" href={"/ai?schoolId="+schoolId}>AI Assistant</Link>
-<Link href="/school/setup">School setup</Link>
-</nav><div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code}</span></div></aside><section className="dashboard"><header className="topbar"><div><p className="eyebrow">V17 · Multi-step AI Assistant</p><h1>School AI Assistant</h1></div></header><section className="workspace-banner"><div><span className="muted">Controlled execution</span><h2>Understand → authorize → execute → audit</h2><p>Compound requests can now execute up to three authorized tools in order while preserving conversation history, idempotency, and an execution ledger for every step.</p></div><div className="workspace-badge">Tool Registry</div></section><section className="workspace-banner"><div style={{width:"100%"}}>{history.length>0&&<div style={{marginBottom:"16px"}}><span className="muted">Conversation</span>{history.slice(-6).map((m,i)=><p key={i}><strong>{m.role==="user"?"You":"EduFlow AI"}:</strong> {m.content}</p>)}</div>}<textarea aria-label="AI request" value={message} onChange={e=>setMessage(e.target.value)} placeholder="Try: Show student 1001's details, attendance, and exam results" rows={5} style={{width:"100%",padding:"14px",borderRadius:"12px",border:"1px solid #ddd"}}/><button className="primary-link" disabled={!message.trim()||loading} onClick={()=>void ask()}>{loading?"Working…":"Ask EduFlow AI"}</button></div></section>{error&&<p className="error page-message">{error}</p>}{plan&&<section className="workspace-banner"><div style={{width:"100%"}}><span className="muted">Execution plan</span><h2>{steps.length>1?`${steps.length} authorized steps`:plan.tool?.name||"AI tool"}</h2><p>Primary intent: {plan.intent||"—"} · Status: {plan.status||"—"} · {plan.reused?"Reused execution":"New execution"}</p>{steps.length>0&&<div style={{marginTop:"16px"}}>{steps.map((step,i)=><div key={step.order||i} style={{padding:"10px 0",borderTop:"1px solid #eee"}}><strong>Step {step.order||i+1}: {step.tool?.name||step.tool?.slug||"AI tool"}</strong><p>Intent: {step.intent||"—"} · Authorization: {step.authorization?.allowed?"Allowed":"Denied"}{step.authorization?.reason?" · "+step.authorization.reason:""}</p></div>)}</div>}{data?.steps&&data.steps.length>0&&<div style={{marginTop:"16px"}}><span className="muted">Execution results</span>{data.steps.map((step,i)=><div key={step.order||i} style={{padding:"10px 0",borderTop:"1px solid #eee"}}><strong>Step {step.order||i+1}: {step.tool||"tool"}</strong>{step.error?<p className="error">{step.error}</p>:<pre style={{whiteSpace:"pre-wrap",overflowX:"auto"}}>{JSON.stringify(step.result,null,2)}</pre>}</div>)}</div>}{data?.result!==undefined&&(!data.steps||data.steps.length===0)&&<pre style={{whiteSpace:"pre-wrap",marginTop:"16px",overflowX:"auto"}}>{JSON.stringify(data.result,null,2)}</pre>}{data?.error&&<p className="error">{data.error}</p>}</div></section>}</section></main>;
+
+ return <main className="app-shell">
+  <aside className="sidebar">
+   <div className="brand"><span className="brand-mark">E</span><span>EduFlow AI</span></div>
+   <p className="sidebar-label">School workspace</p>
+   <nav className="side-nav">{nav.map(item=><Link key={item.href} className={item.href==="/ai"?"active":""} href={item.href+"?schoolId="+schoolId}>{item.label}</Link>)}</nav>
+   <div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code} · {role}</span></div>
+  </aside>
+
+  <section className="dashboard ai-dashboard">
+   <header className="topbar ai-topbar">
+    <div><p className="eyebrow">AI assistant</p><h1>School intelligence</h1><p className="ai-subtitle">Ask questions, find records and run authorized school operations in plain language.</p></div>
+    <div className="ai-status"><span></span><strong>Secure workspace</strong></div>
+   </header>
+
+   <section className="ai-hero">
+    <div className="ai-hero-copy"><span className="ai-kicker">EDUFLOW AI</span><h2>Your school assistant</h2><p>Search students, check attendance, review exam results and explore school information without navigating through multiple screens.</p></div>
+    <div className="ai-hero-stats"><div><strong>{history.length/2||0}</strong><span>Requests</span></div><div><strong>{steps.length||0}</strong><span>Steps</span></div><div><strong>{data?.plan?.authorization?.allowed?"Ready":"—"}</strong><span>Authorization</span></div></div>
+   </section>
+
+   <section className="ai-workspace">
+    <div className="ai-chat-panel">
+      <div className="ai-panel-head"><div><strong>Ask EduFlow</strong><span>Natural language school queries</span></div><span className="ai-live-dot">● Live</span></div>
+      <div className="ai-conversation">
+       {history.length===0?<div className="ai-welcome"><div className="ai-welcome-icon">✦</div><h3>What would you like to know?</h3><p>Start with a student, attendance, exam, timetable or dashboard question.</p><div className="ai-suggestions">{["Find student 1001","Show today's attendance","Show exam results","Give me today's dashboard"].map(q=><button key={q} type="button" onClick={()=>setMessage(q)}>{q}</button>)}</div></div>:
+       history.slice(-8).map((item,i)=><div key={i} className={"ai-message "+item.role}><div className="ai-avatar">{item.role==="user"?"You":"✦"}</div><div><div className="ai-message-bubble">{item.content}</div><small>{item.time}</small></div></div>)}
+      </div>
+      <div className="ai-composer">
+       <textarea value={message} onChange={e=>setMessage(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();void ask()}}} placeholder="Ask something about your school…" rows={3} disabled={loading}/>
+       <div className="ai-composer-footer"><span>Enter to send · Shift + Enter for new line</span><button type="button" className="ai-send" disabled={!message.trim()||loading} onClick={()=>void ask()}>{loading?"Working…":"Ask AI"} <span>↗</span></button></div>
+      </div>
+    </div>
+
+    <aside className="ai-inspector">
+      <div className="ai-panel-head"><div><strong>Request details</strong><span>Execution transparency</span></div></div>
+      {!data&&!loading?<div className="ai-inspector-empty"><div>◎</div><strong>Nothing running</strong><p>Your execution plan and results will appear here after you submit a request.</p></div>:
+      <div className="ai-inspector-body">
+       {loading?<div className="ai-loading"><span></span><span></span><span></span><p>Understanding your request…</p></div>:
+       <>
+        {plan&&<div className="ai-request-card"><span>PRIMARY INTENT</span><strong>{plan.intent||"School request"}</strong><div><b>{plan.status||"completed"}</b><span>{plan.reused?"Reused execution":"New execution"}</span></div></div>}
+        {plan&&<button className="ai-plan-toggle" type="button" onClick={()=>setShowPlan(v=>!v)}><span>Execution plan · {steps.length||1} step{steps.length===1?"":"s"}</span><b>{showPlan?"Hide":"View"} plan</b></button>}
+        {showPlan&&<div className="ai-step-list">{steps.length?steps.map((step,i)=><div className="ai-step" key={step.order||i}><span>{step.order||i+1}</span><div><strong>{toolLabel(step)}</strong><p>{step.intent||"Authorized operation"}</p></div><em className={step.authorization?.allowed?"allowed":"denied"}>{step.authorization?.allowed?"Allowed":"Denied"}</em></div>):<div className="ai-step">No execution steps returned.</div>}</div>}
+        {(data?.steps?.length||data?.result!==undefined)&&<div className="ai-results"><div className="ai-results-head"><span>RESULT</span><strong>{lastResult?.tool||"Execution result"}</strong></div>{data?.steps?.map((step,i)=><div className="ai-result-block" key={step.order||i}>{step.error?<div className="ai-error-result"><strong>Could not complete this step</strong><p>{step.error}</p></div>:<ResultView value={step.result}/>}</div>)}{(!data.steps||data.steps.length===0)&&data.result!==undefined&&<ResultView value={data.result}/>}</div>}
+        {data?.error&&<div className="ai-error-result"><strong>Request needs attention</strong><p>{data.error}</p></div>}
+       </>}
+      </div>}
+      {error&&!data?<div className="ai-error-result"><strong>Request failed</strong><p>{error}</p></div>:null}
+      </div>
+    </aside>
+   </section>
+   {conversationId?<div className="ai-session">Conversation active · {conversationId.slice(0,8)}…</div>:null}
+  </section>
+ </main>;
 }
