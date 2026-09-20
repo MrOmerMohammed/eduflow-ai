@@ -64,9 +64,49 @@ The administrator workspace contains:
 13. **AI Assistant** — authorized natural-language school operations.
 14. **School setup** — school profile/onboarding configuration.
 
-## 2.2 First-time school setup
+## 2.2 Fast one-CSV school onboarding
 
-Before adding students, configure the academic structure.
+For a school migrating from an existing Excel/CSV database, do **not** create every grade, section, subject and student manually. Use **Data Import → One-CSV onboarding**.
+
+### What one CSV can create
+
+A single CSV can contain repeated student/class/subject/teacher rows. EduFlow AI automatically matches or creates:
+
+- Academic years
+- Grades and grade codes
+- Sections and capacities
+- Subjects and subject codes
+- Students and admission numbers
+- Academic enrollments
+- Guardians and student-guardian links
+- Teacher/staff records
+- Teacher login invitations and school Teacher role assignment when teacher emails are supplied
+
+### Setup process
+
+1. Download the **CSV template** from Data Import.
+2. Fill the CSV in Excel or Google Sheets.
+3. Keep one row per student/subject combination when a student has multiple subjects.
+4. Repeat the academic/class/teacher values as needed; EduFlow automatically deduplicates them.
+5. Upload the CSV and click **Preview school setup**.
+6. Fix every validation error before continuing.
+7. Click **Create school data** only after the preview reports the file is valid.
+8. Verify Students, Academic and Staff & HR after import.
+9. Teacher emails in the CSV are used to send invitations or assign an existing account to the Teacher role.
+
+### Required CSV columns
+
+`academic_year, academic_year_start, academic_year_end, academic_year_current, grade, section, admission_number, first_name`
+
+### Useful optional columns
+
+`grade_code, section_capacity, subject, subject_code, roll_number, date_of_birth, gender, student_email, student_phone, student_status, guardian_name, guardian_relationship, guardian_phone, guardian_email, guardian_primary, teacher_name, teacher_first_name, teacher_last_name, teacher_email, teacher_phone, teacher_employee_number, teacher_designation, teacher_department, teacher_employment_type, teacher_joining_date`
+
+**Safety:** Preview is non-destructive. The final commit is performed by a server-side transactional database function with administrator authorization, so a failed database operation does not leave a half-created school structure.
+
+## 2.3 First-time school setup
+
+Before adding students manually, configure the academic structure.
 
 Recommended order:
 
