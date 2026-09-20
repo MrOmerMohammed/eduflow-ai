@@ -38,6 +38,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   const school = membership.schools;
   const role = normalizeSchoolRole(membership.role);
+  if (!role) redirect("/setup");
   const nav = SCHOOL_NAV.filter((item) => (item.roles as readonly string[]).includes(role)).map((item) => ({
     ...item,
     href: `${item.href}?schoolId=${school.id}`,
