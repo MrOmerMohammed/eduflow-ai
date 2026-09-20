@@ -117,7 +117,6 @@ export default function AiBoard({schoolId,school,role="admin"}:{schoolId:string;
        </>}
       </div>}
       {error&&!data?<div className="ai-error-result"><strong>Request failed</strong><p>{error}</p></div>:null}
-      </div>
     </aside>
    </section>
    {conversationId?<div className="ai-session">Conversation active · {conversationId.slice(0,8)}…</div>:null}
