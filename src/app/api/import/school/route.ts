@@ -24,9 +24,14 @@ function parseRows(text:string){
  const rows:Record<string,unknown>[]=[];
  records.slice(1).forEach(values=>{const out:Record<string,unknown>={}; for(const h of [...REQUIRED,...OPTIONAL]) if(headers.includes(h)) out[h]=values[headers.indexOf(h)]??""; if(Object.values(out).some(v=>String(v).trim()!=="")) rows.push(out);});
  if(!rows.length) throw new Error("No data rows were found"); if(rows.length>10000) throw new Error("CSV exceeds the 10,000-row safety limit");
- const errors:string[]=[]; const seen=new Set<string>();
+ const errors:string[]=[]; const seen=new Map<string,string>();
  rows.forEach((r,i)=>{const line=i+2; for(const h of REQUIRED) if(!String(r[h]??"").trim()) errors.push(`Row ${line}: ${h} is required`);
-  const admission=String(r.admission_number??"").trim().toLowerCase(); if(admission){if(seen.has(admission))errors.push(`Row ${line}: duplicate admission_number ${r.admission_number} in CSV`);seen.add(admission);}
+  const admission=String(r.admission_number??"").trim().toLowerCase(); if(admission){
+   const fingerprint=[r.first_name,r.middle_name,r.last_name,r.date_of_birth,r.grade,r.section,r.academic_year].map(v=>String(v??"").trim().toLowerCase()).join("|");
+   const previous=seen.get(admission);
+   if(previous && previous!==fingerprint) errors.push(`Row ${line}: admission_number ${r.admission_number} is reused with different student/enrollment details`);
+   else if(!previous) seen.set(admission,fingerprint);
+  }
   for(const h of ["date_of_birth","academic_year_start","academic_year_end","teacher_joining_date"]) if(r[h]&&Number.isNaN(Date.parse(String(r[h])))) errors.push(`Row ${line}: invalid ${h}`);
   if(r.teacher_email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(r.teacher_email))) errors.push(`Row ${line}: invalid teacher_email`);
  });
@@ -49,7 +54,9 @@ export async function PUT(request:Request){
   const {schoolId,rows,errors}=await load(request);if(errors.length)return NextResponse.json({error:"Fix validation errors before commit",errors:errors.slice(0,100)},{status:422});
   const admin=createSupabaseAdminClient();const {data:created,error:importError}=await admin.rpc("import_school_setup",{p_actor_user_id:actor,p_school_id:schoolId,p_rows:rows});if(importError)throw new Error(importError.message);
   const teacherEmails=[...new Set(rows.map(r=>String(r.teacher_email??"").trim().toLowerCase()).filter(Boolean))];const invitations:{email:string;invited:boolean;error?:string}[]=[];
-  for(const email of teacherEmails){try{const users=await admin.auth.admin.listUsers({page:1,perPage:1000});if(users.error)throw new Error(users.error.message);const existing=users.data.users.find(u=>u.email?.toLowerCase()===email);
+  const users=await admin.auth.admin.listUsers({page:1,perPage:1000});if(users.error)throw new Error(users.error.message);
+  const userByEmail=new Map(users.data.users.map(u=>[(u.email??"").toLowerCase(),u]));
+  for(const email of teacherEmails){try{const existing=userByEmail.get(email);
    if(existing){const a=await admin.rpc("assign_school_role",{p_actor_user_id:actor,p_school_id:schoolId,p_target_user_id:existing.id,p_role_key:"teacher"});if(a.error)throw new Error(a.error.message);invitations.push({email,invited:false});}
    else{const invited=await admin.auth.admin.inviteUserByEmail(email,{data:{school_role:"teacher"}});if(invited.error)throw new Error(invited.error.message);if(invited.data.user?.id){const a=await admin.rpc("assign_school_role",{p_actor_user_id:actor,p_school_id:schoolId,p_target_user_id:invited.data.user.id,p_role_key:"teacher"});if(a.error)throw new Error(a.error.message);}invitations.push({email,invited:true});}
   }catch(e){invitations.push({email,invited:false,error:e instanceof Error?e.message:"Unable to assign teacher access"});}}
