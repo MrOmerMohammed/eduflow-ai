@@ -17,7 +17,94 @@ const modules = [
 ] as const;
 
 function MarketingHome() {
-  return <main className="marketing-shell"><nav className="marketing-nav"><a className="brand" href="/"><span className="brand-mark">E</span><span>EduFlow AI</span></a><div className="marketing-links"><a href="/pricing">Pricing</a><a href="/security">Security</a><a href="/auth/login">Sign in</a><a className="marketing-cta" href="/auth/sign-up">Start free trial</a></div></nav><section className="hero"><div className="hero-copy"><p className="eyebrow">AI-native school ERP</p><h1>Run your school from one command center.</h1><p className="hero-lead">EduFlow AI brings students, attendance, exams, fees, staff, communication, analytics and an authorized AI assistant into one multi-tenant workspace.</p><div className="hero-actions"><a className="primary-link" href="/auth/sign-up">Start 14-day trial</a><a className="secondary-link" href="/pricing">View pricing</a></div><p className="trust-line">Built for private schools, school groups and growing education operators.</p></div><div className="hero-panel"><div className="hero-panel-head"><span>School command center</span><b>Role-aware workspace</b></div><div className="hero-metrics"><div><span>Students</span><strong>600+</strong></div><div><span>Attendance</span><strong>Today</strong></div><div><span>Fees</span><strong>Tracked</strong></div><div><span>Access</span><strong>RBAC</strong></div></div><div className="hero-flow"><span>Sign in</span><b>→</b><span>Role</span><b>→</b><span>Permissions</span><b>→</b><span>Workspace</span></div></div></section><section className="marketing-section"><p className="eyebrow">Everything schools need</p><h2>One operating layer for every school role.</h2></section><footer className="marketing-footer"><span>© 2026 EduFlow AI</span><div><a href="/pricing">Pricing</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/security">Security</a></div></footer></main>;
+  const features = [
+    ["Student Management", "Admissions, student profiles, enrollment and school records in one place."],
+    ["Attendance", "Give teachers a fast daily workflow for marking and reviewing attendance."],
+    ["Academics & Exams", "Organize grades, sections, subjects, assessments and results."],
+    ["Fees & Finance", "Track fee structures, student balances, invoices and collections workflows."],
+    ["Staff & HR", "Manage staff records, school roles and operational HR workflows."],
+    ["AI Assistant", "Ask authorized school questions and get structured answers from your workspace data."],
+  ];
+
+  const plans = [
+    { name: "Starter", price: "₹1,999", students: "Up to 500 students", text: "Core school operations", featured: false },
+    { name: "Growth", price: "₹4,999", students: "Up to 1,500 students", text: "Full operating layer + AI", featured: true },
+    { name: "Pro", price: "₹9,999", students: "Up to 5,000 students", text: "Multi-school & advanced operations", featured: false },
+  ];
+
+  return <main className="marketing-shell">
+    <nav className="marketing-nav">
+      <a className="brand" href="/"><span className="brand-mark">E</span><span>EduFlow AI</span></a>
+      <div className="marketing-links">
+        <a href="#features">Features</a><a href="#how-it-works">How it works</a><a href="#pricing">Pricing</a><a href="/security">Security</a><a href="/auth/login">Sign in</a>
+        <a className="marketing-cta" href="/auth/sign-up">Try EduFlow AI</a>
+      </div>
+    </nav>
+
+    <section className="hero marketing-hero">
+      <div className="hero-copy">
+        <p className="eyebrow">Modern school management software</p>
+        <h1>Everything your school needs. <span className="hero-highlight">One simple workspace.</span></h1>
+        <p className="hero-lead">EduFlow AI helps administrators, teachers and staff manage students, academics, attendance, exams, fees, communication and school operations without jumping between disconnected systems.</p>
+        <div className="hero-actions">
+          <a className="primary-link" href="/auth/sign-up">Start your free 14-day trial →</a>
+          <a className="secondary-link" href="#pricing">See plans & pricing</a>
+        </div>
+        <div className="hero-proof"><span>✓ No payment required to start</span><span>✓ Role-based access</span><span>✓ Built for growing schools</span></div>
+      </div>
+      <div className="hero-panel marketing-dashboard-preview">
+        <div className="hero-panel-head"><span>EduFlow AI command center</span><b>Live workspace</b></div>
+        <div className="preview-welcome"><span>Good morning</span><strong>School overview</strong><small>Everything important at a glance.</small></div>
+        <div className="hero-metrics">
+          <div><span>Students</span><strong>600+</strong><small>Active records</small></div>
+          <div><span>Attendance</span><strong>94.8%</strong><small>This month</small></div>
+          <div><span>Staff</span><strong>42</strong><small>Active staff</small></div>
+          <div><span>Fees</span><strong>₹8.4L</strong><small>Tracked</small></div>
+        </div>
+        <div className="preview-ai"><span>AI Assistant</span><strong>“Give me today's attendance summary.”</strong><small>Authorized school data → structured answer</small></div>
+      </div>
+    </section>
+
+    <section className="marketing-section marketing-trust">
+      <p className="eyebrow">Designed around school roles</p>
+      <h2>One platform, different views for different people.</h2>
+      <div className="role-strip">
+        <article><span className="role-icon">A</span><strong>Administrator</strong><p>School-wide control, setup, finance, staff and analytics.</p></article>
+        <article><span className="role-icon">T</span><strong>Teacher</strong><p>Students, academics, attendance, exams and teaching workflows.</p></article>
+        <article><span className="role-icon">S</span><strong>Staff</strong><p>Operational access to the information needed for daily work.</p></article>
+      </div>
+    </section>
+
+    <section id="features" className="marketing-section">
+      <p className="eyebrow">What you can manage</p>
+      <h2>Replace scattered spreadsheets and disconnected tools with one operating layer.</h2>
+      <div className="value-grid">{features.map(([title, description], index) => <article className="value-card feature-card" key={title}><span className="feature-number">0{index + 1}</span><h3>{title}</h3><p>{description}</p></article>)}</div>
+    </section>
+
+    <section id="how-it-works" className="marketing-section how-section">
+      <div className="split">
+        <div><p className="eyebrow">Get started in minutes</p><h2>From signup to school workspace.</h2><p className="lead">Create your administrator account, set up the school workspace, import your school data, invite teachers and staff, then start using the modules your role allows.</p><a className="primary-link" href="/auth/sign-up">Create a school workspace →</a></div>
+        <div className="feature-list">
+          <p><strong>01 · Create</strong><br/>Create your administrator account and school workspace.</p>
+          <p><strong>02 · Import</strong><br/>Use the one-CSV onboarding flow to load grades, sections, subjects, students and staff records.</p>
+          <p><strong>03 · Assign</strong><br/>Assign teacher and staff access with role-based permissions.</p>
+          <p><strong>04 · Operate</strong><br/>Run attendance, academics, exams, communication, HR and other daily workflows.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" className="marketing-pricing">
+      <div className="marketing-pricing-head"><div><p className="eyebrow">Simple, transparent pricing</p><h2>Start small. Scale with your school.</h2></div><a className="secondary-link" href="/pricing">Compare all plan details →</a></div>
+      <div className="marketing-price-grid">{plans.map(plan => <article className={`marketing-price-card ${plan.featured ? "featured" : ""}`} key={plan.name}>{plan.featured && <span className="pricing-badge">Recommended for growing schools</span>}<span className="plan-name">{plan.name}</span><div className="marketing-price">{plan.price}<small>/month</small></div><strong>{plan.students}</strong><p>{plan.text}</p><a className={plan.featured ? "primary-link" : "secondary-link"} href="/auth/sign-up">Try this plan →</a></article>)}</div>
+      <p className="pricing-disclaimer">14-day trial. No payment required to create a workspace. Pricing shown is the current listed monthly plan pricing.</p>
+    </section>
+
+    <section className="marketing-bottom">
+      <div><p className="eyebrow">Ready to see it in action?</p><h2>Build your school's workspace and explore EduFlow AI.</h2><p>Create a trial workspace, load your demo or school data, and experience the role-based school management workflow.</p><div className="hero-actions"><a className="primary-link" href="/auth/sign-up">Try EduFlow AI free →</a><a className="secondary-link dark-secondary" href="/pricing">View pricing</a></div></div>
+    </section>
+
+    <footer className="marketing-footer"><span>© {new Date().getFullYear()} EduFlow AI</span><div><a href="/pricing">Pricing</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/security">Security</a><a href="/auth/login">Sign in</a></div></footer>
+  </main>;
 }
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ schoolId?: string }> }) {
