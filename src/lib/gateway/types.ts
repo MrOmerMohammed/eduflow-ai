@@ -43,7 +43,7 @@ export type GatewayAction =
   | "notification.preferences.set"
   | "parent.dashboard"
   | "data.import.commit"
-  | "school.role.assign";
+  | "school.role.assign"\n  | "school.onboarding.save";
 
 export type GatewayRequest = {
   action: GatewayAction;
