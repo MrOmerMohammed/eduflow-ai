@@ -41,7 +41,7 @@ export async function updateSession(request: NextRequest) {
   const role = normalizeSchoolRole(membership.role);
   const allowed = allowedRolesForPath(pathname);
 
-  if (!allowed.includes(role)) {
+  if (!role || !allowed.includes(role)) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.search = `?schoolId=${membership.school_id}`;
