@@ -51,7 +51,92 @@ if(body.action==="finance.balance.get"){const {data,error}=await admin.rpc("get_
 if(body.action==="attendance.roster"){const {data,error}=await admin.rpc("get_attendance_roster",{p_actor_user_id:userId,p_school_id:uuidValue(payload,"schoolId"),p_section_id:uuidValue(payload,"sectionId"),p_academic_year_id:uuidValue(payload,"academicYearId"),p_attendance_date:stringValue(payload,"attendanceDate")});if(error)throw new Error(error.message);return NextResponse.json({data});}
 if(body.action==="attendance.save"){if(!Array.isArray(payload.records))throw new Error("records must be an array");const {data,error}=await admin.rpc("save_attendance",{p_actor_user_id:userId,p_school_id:uuidValue(payload,"schoolId"),p_academic_year_id:uuidValue(payload,"academicYearId"),p_section_id:uuidValue(payload,"sectionId"),p_attendance_date:stringValue(payload,"attendanceDate"),p_records:payload.records,p_status:optionalString(payload,"status")??"submitted",p_notes:optionalString(payload,"notes")});if(error)throw new Error(error.message);return NextResponse.json({data});}
 if(body.action==="attendance.student.summary"){const {data,error}=await admin.rpc("get_student_attendance_summary",{p_actor_user_id:userId,p_school_id:uuidValue(payload,"schoolId"),p_student_id:uuidValue(payload,"studentId"),p_academic_year_id:uuidValue(payload,"academicYearId")});if(error)throw new Error(error.message);return NextResponse.json({data});}
-if(body.action==="school.onboarding.save"){const {data,error}=await admin.rpc("save_school_onboarding",{p_actor_user_id:userId,p_school_id:uuidValue(payload,"schoolId"),p_status:optionalString(payload,"status")??"in_progress",p_current_step:Number(payload.currentStep??1),p_answers:payload.answers&&typeof payload.answers==="object"?payload.answers:{}});if(error)throw new Error(error.message);return NextResponse.json({data});}
+if(body.action==="school.onboarding.save"){
+  const schoolId=uuidValue(payload,"schoolId");
+  const status=optionalString(payload,"status")==="completed"?"completed":"in_progress";
+  const currentStep=Math.max(1,Math.min(8,Number(payload.currentStep??1)));
+  const answers=payload.answers&&typeof payload.answers==="object"&&!Array.isArray(payload.answers)?payload.answers as Record<string,unknown>:{};
+
+  const {data:membership,error:membershipError}=await supabase
+    .from("school_memberships")
+    .select("school_id,role,status,schools(id,organization_id,status)")
+    .eq("school_id",schoolId)
+    .eq("user_id",userId)
+    .eq("status","active")
+    .maybeSingle();
+  if(membershipError) throw new Error(membershipError.message);
+  if(!membership?.schools || membership.role!=="admin") throw new Error("Only school administrators can complete school setup");
+
+  const schoolRecord=Array.isArray(membership.schools)?membership.schools[0]:membership.schools;
+  if(!schoolRecord || schoolRecord.status!=="active") throw new Error("School not found or inactive");
+
+  const schoolType=typeof answers.schoolType==="string"?answers.schoolType.trim():"";
+  const board=typeof answers.board==="string"?answers.board.trim():"";
+  const medium=typeof answers.medium==="string"?answers.medium.trim():"";
+  if(currentStep>=1 && (!schoolType||!board||!medium)) throw new Error("Please complete the school profile before continuing");
+
+  const academicYear=typeof answers.academicYear==="string"?answers.academicYear.trim():"";
+  if(currentStep>=2 && !academicYear) throw new Error("Academic year is required");
+
+  const gradeConfigs=Array.isArray(answers.gradeConfigs)?answers.gradeConfigs:[];
+  if(currentStep>=3){
+    if(!Number.isInteger(Number(answers.gradeCount))||Number(answers.gradeCount)<1||Number(answers.gradeCount)>20) throw new Error("Number of grades must be between 1 and 20");
+    if(gradeConfigs.length!==Number(answers.gradeCount)) throw new Error("Please configure every grade");
+    const gradeNames=gradeConfigs.map((g)=>g&&typeof g==="object"&&typeof (g as Record<string,unknown>).name==="string"?(g as Record<string,unknown>).name.trim().toLowerCase():"");
+    if(gradeNames.some((name)=>!name)) throw new Error("Every grade must have a name");
+    if(new Set(gradeNames).size!==gradeNames.length) throw new Error("Grade names must be unique");
+    for(const grade of gradeConfigs){
+      const g=grade as Record<string,unknown>;
+      const sections=Number(g.sections),students=Number(g.students);
+      if(!Number.isInteger(sections)||sections<1||sections>20) throw new Error("Each grade must have between 1 and 20 sections");
+      if(!Number.isInteger(students)||students<1) throw new Error("Students per section must be at least 1");
+    }
+  }
+
+  if(currentStep>=4){
+    const studentCount=Number(answers.studentCount);
+    if(!Number.isInteger(studentCount)||studentCount<0) throw new Error("Student count must be zero or greater");
+  }
+
+  if(currentStep>=5){
+    const staffCount=Number(answers.staffCount),teacherCount=Number(answers.teacherCount),adminStaffCount=Number(answers.adminStaffCount);
+    if([staffCount,teacherCount,adminStaffCount].some((value)=>!Number.isInteger(value)||value<0)) throw new Error("Staff counts must be zero or greater");
+    if(teacherCount+adminStaffCount>staffCount) throw new Error("Teachers and administrative staff cannot exceed total staff");
+  }
+
+  if(currentStep>=6){
+    if(!["daily","period","both"].includes(String(answers.attendanceMode))) throw new Error("Invalid attendance mode");
+    if(!["term","monthly","both"].includes(String(answers.examMode))) throw new Error("Invalid exam mode");
+    if(!["monthly","term","annual","mixed"].includes(String(answers.feeMode))) throw new Error("Invalid fee mode");
+  }
+
+  const {data,error}=await admin
+    .from("school_onboarding_profiles")
+    .upsert({
+      school_id:schoolId,
+      status,
+      current_step:currentStep,
+      answers,
+      completed_at:status==="completed"?new Date().toISOString():null,
+      updated_at:new Date().toISOString(),
+    },{onConflict:"school_id"})
+    .select("school_id,status,current_step,answers,completed_at,updated_at")
+    .single();
+  if(error) throw new Error(error.message);
+
+  const {error:auditError}=await admin.from("audit_logs").insert({
+    organization_id:schoolRecord.organization_id,
+    school_id:schoolId,
+    actor_user_id:userId,
+    action:"school.onboarding.save",
+    entity_type:"school_onboarding",
+    entity_id:schoolId,
+    metadata:{status,current_step:currentStep},
+  });
+  if(auditError) throw new Error(auditError.message);
+
+  return NextResponse.json({data});
+}
 if(body.action==="workspace.bootstrap"){const {data,error}=await admin.rpc("bootstrap_school_workspace",{p_actor_user_id:userId,p_org_name:stringValue(payload,"organizationName"),p_school_name:stringValue(payload,"schoolName"),p_school_code:stringValue(payload,"schoolCode")});if(error)throw new Error(error.message);return NextResponse.json({data});}
 if(body.action==="academic_year.create"){const {data,error}=await admin.rpc("create_academic_year",{p_actor_user_id:userId,p_school_id:uuidValue(payload,"schoolId"),p_name:stringValue(payload,"name"),p_start_date:stringValue(payload,"startDate"),p_end_date:stringValue(payload,"endDate"),p_is_current:Boolean(payload.isCurrent)});if(error)throw new Error(error.message);return NextResponse.json({data});}
 if(body.action==="grade.create"){const {data,error}=await admin.rpc("create_grade",{p_actor_user_id:userId,p_school_id:uuidValue(payload,"schoolId"),p_name:stringValue(payload,"name"),p_code:stringValue(payload,"code"),p_sort_order:Number(payload.sortOrder??0)});if(error)throw new Error(error.message);return NextResponse.json({data});}
