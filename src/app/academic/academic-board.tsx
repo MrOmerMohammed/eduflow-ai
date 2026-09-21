@@ -24,7 +24,6 @@ export default function AcademicBoard({schoolId,school,grades,sections,subjects,
 <Link href={`/communication?schoolId=${schoolId}`}>Communication</Link>
 <Link href={`/notifications?schoolId=${schoolId}`}>Notifications</Link>
 <Link href={`/parent?schoolId=${schoolId}`}>Parent Portal</Link>
-<Link href={`/import?schoolId=${schoolId}`}>Data Import</Link>
 <Link href={`/ai?schoolId=${schoolId}`}>AI Assistant</Link>
 <Link href="/school/setup">School setup</Link>
 </nav><div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code}</span></div></aside><section className="dashboard"><header className="topbar"><div><p className="eyebrow">V5 · Academic</p><h1>Academic management</h1></div></header><section className="workspace-banner"><div><span className="muted">Curriculum workspace</span><h2>Subjects, curriculum, lessons & timetable</h2><p>School-scoped academic planning with RBAC and audit logging.</p></div><div className="workspace-badge">RBAC + audit</div></section><nav className="student-toolbar">{["subjects","curriculum","lessons","timetable"].map(t=><button key={t} className={tab===t?"attendance-status active":"attendance-status"} onClick={()=>setTab(t)}>{t}</button>)}</nav>{error&&<p className="error page-message">{error}</p>}{message&&<p className="success page-message">{message}</p>}
