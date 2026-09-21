@@ -784,3 +784,10 @@ Copy the required Supabase variables into `.env.local`, install dependencies wit
 - [ ] AI assistant tested with authorized and unauthorized requests
 - [ ] Backup/recovery process documented
 - [ ] Privacy, Terms and Security pages reviewed
+
+
+### One-CSV school setup
+
+From **School setup → Create using CSV**, administrators can upload the production school template and create the academic foundation in one flow. The importer creates academic years, grades, sections, subjects, students, enrollments, guardians and teacher records, then sends/assigns teacher access. Optional timetable columns (`timetable_day`, `timetable_period`, `timetable_start`, `timetable_end`, `timetable_room`) can create teacher timetable entries when a teacher email is present.
+
+The CSV validator accepts common employment labels such as `Full Time`, `Part Time`, `Contract`, `Temporary`, and `Intern` and normalizes them automatically.
