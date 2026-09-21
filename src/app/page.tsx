@@ -130,6 +130,19 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     href: `${item.href}?schoolId=${school.id}`,
   }));
 
+  let teacherSchedule: any[] = [];
+  if (role === "teacher") {
+    const { data } = await supabase
+      .from("timetable_entries")
+      .select("id,day_of_week,period_no,starts_at,ends_at,room,sections(name,grades(name)),subjects(name,code)")
+      .eq("school_id", school.id)
+      .eq("teacher_user_id", userId)
+      .eq("is_active", true)
+      .order("day_of_week")
+      .order("period_no");
+    teacherSchedule = data ?? [];
+  }
+
   const [{ count: yearCount }, { count: gradeCount }, { count: sectionCount }, { count: staffCount }] = await Promise.all([
     supabase.from("academic_years").select("id", { count: "exact", head: true }).eq("school_id", school.id),
     supabase.from("grades").select("id", { count: "exact", head: true }).eq("school_id", school.id),
@@ -150,6 +163,27 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <header className="topbar"><div><p className="eyebrow">Role-based school workspace</p><h1>{role === "admin" ? "School command center" : role === "teacher" ? "Teacher workspace" : "Staff workspace"}</h1></div><div className="user-chip"><span className="status-dot"/>{role}<SignOutButton /></div></header>
       <section className="workspace-banner"><div><span className="muted">Active school</span><h2>{school.name}</h2><p>{school.code} · Access is restricted to your assigned role.</p></div><div className="workspace-badge">{role.toUpperCase()} ACCESS</div></section>
       <section className="metric-grid"><article className="metric"><span>Academic years</span><strong>{yearCount ?? 0}</strong><small>Visible to your role</small></article><article className="metric"><span>Grades</span><strong>{gradeCount ?? 0}</strong><small>Visible to your role</small></article><article className="metric"><span>Sections</span><strong>{sectionCount ?? 0}</strong><small>Visible to your role</small></article><article className="metric"><span>Active staff</span><strong>{staffCount ?? 0}</strong><small>Workspace records</small></article></section>
+      {role === "teacher" && (
+        <section className="teacher-home-card">
+          <div className="section-heading"><div><p className="eyebrow">Teaching workflow</p><h2>Your teaching day</h2></div><span>{teacherSchedule.length} scheduled classes</span></div>
+          <div className="teacher-quick-actions">
+            <a className="primary-link" href={`/attendance?schoolId=${school.id}`}>Take attendance →</a>
+            <a className="secondary-link" href={`/exams?schoolId=${school.id}`}>Enter marks</a>
+            <a className="secondary-link" href={`/academic?schoolId=${school.id}`}>Plan lessons</a>
+            <a className="secondary-link" href={`/students?schoolId=${school.id}`}>View students</a>
+          </div>
+          {teacherSchedule.length ? (
+            <div className="teacher-schedule-list">{teacherSchedule.map((item: any) => {
+              const section = Array.isArray(item.sections) ? item.sections[0] : item.sections;
+              const grade = Array.isArray(section?.grades) ? section.grades[0] : section?.grades;
+              const subject = Array.isArray(item.subjects) ? item.subjects[0] : item.subjects;
+              const day = ["","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][item.day_of_week] ?? "Day";
+              return <div className="teacher-schedule-row" key={item.id}><strong>{day} · Period {item.period_no}</strong><span>{grade?.name ? grade.name + " · " : ""}{section?.name ?? "Section"}</span><span>{subject?.name ?? "Subject"}</span><small>{item.starts_at && item.ends_at ? item.starts_at + "–" + item.ends_at : "Time not set"}{item.room ? " · " + item.room : ""}</small></div>;
+            })}</div>
+          ) : <p className="empty">No teaching timetable has been assigned yet. Ask the administrator to assign your classes.</p>}
+        </section>
+      )}
+
       <section className="section-heading"><div><p className="eyebrow">Your permissions</p><h2>Available modules</h2></div><span>{nav.length} modules</span></section>
       <section className="module-grid">{visibleModules.map(([name, description, href]) => <article className="module-card" key={name}><div className="module-icon">{name.slice(0, 1)}</div><h3>{name}</h3><p>{description}</p><a className="table-link" href={`${href}?schoolId=${school.id}`}>Open →</a></article>)}</section>
     </section>
