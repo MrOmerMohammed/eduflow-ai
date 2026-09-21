@@ -84,7 +84,7 @@ export async function PUT(request:Request){
    const [{data:year},{data:grade},{data:section},{data:subject}]=await Promise.all([
     admin.from("academic_years").select("id").eq("school_id",schoolId).eq("name",yearName).maybeSingle(),
     admin.from("grades").select("id").eq("school_id",schoolId).eq("name",gradeName).maybeSingle(),
-    admin.from("sections").select("id").eq("school_id",schoolId).eq("name",sectionName).maybeSingle(),
+    admin.from("sections").select("id").eq("school_id",schoolId).eq("grade_id",grade?.id ?? "").eq("name",sectionName).maybeSingle(),
     admin.from("subjects").select("id").eq("school_id",schoolId).eq("name",subjectName).maybeSingle()
    ]);
    if(!section?.id || !subject?.id) continue;
