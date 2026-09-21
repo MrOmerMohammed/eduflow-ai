@@ -67,7 +67,6 @@ export default function AttendanceBoard({ schoolId, school, years, sections }: P
 <Link href={`/communication?schoolId=${schoolId}`}>Communication</Link>
 <Link href={`/notifications?schoolId=${schoolId}`}>Notifications</Link>
 <Link href={`/parent?schoolId=${schoolId}`}>Parent Portal</Link>
-<Link href={`/import?schoolId=${schoolId}`}>Data Import</Link>
 <Link href={`/ai?schoolId=${schoolId}`}>AI Assistant</Link>
 <Link href="/school/setup">School setup</Link>
 </nav><div className="sidebar-footer"><strong>{school.name}</strong><span>{school.code}</span></div></aside>
