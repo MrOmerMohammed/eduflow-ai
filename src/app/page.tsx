@@ -12,7 +12,6 @@ const modules = [
   ["Staff","Staff records, roles and HR workflows","/hr"],
   ["Communication","School-wide and targeted messaging","/communication"],
   ["Analytics","Management KPIs and operational intelligence","/analytics"],
-  ["Data Import","Safe workbook staging, validation and migration","/import"],
   ["AI Assistant","Authorized AI actions through the gateway","/ai"],
 ] as const;
 
