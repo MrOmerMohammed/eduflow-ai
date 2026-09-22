@@ -86,7 +86,7 @@ As of 2026-09-22:
 - Node runtime: pinned to 20.x
 - Health endpoint: implemented
 - CI: typecheck + build + production health smoke test
-- Supabase: production migration history contains the complete historical sequence, while the repository contains only a subset; migration source-of-truth reconciliation remains open
+- Supabase: 52 production migrations are present; missing historical source files are not fabricated. A data-free production schema baseline is committed under `supabase/baseline/` and its table/constraint/index layer has been replay-tested in a disposable transaction. Full clean-database + Golden Path verification remains open
 - Supabase security advisor: 13 RLS-enabled/no-policy tables and leaked-password protection disabled
 - Golden-path harness: committed, rollback-only, not yet a passed end-to-end commercial test
 - Production currently has two schools but no students/staff records, so real-school workflow coverage is still unproven
