@@ -29,3 +29,16 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Production smoke test
+        run: |
+          npm start > /tmp/eduflow-next.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3000/api/health > /tmp/eduflow-health.json; then
+              break
+            fi
+            sleep 2
+          done
+          grep -q '"status":"ok"' /tmp/eduflow-health.json
