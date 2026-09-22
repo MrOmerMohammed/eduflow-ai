@@ -88,15 +88,12 @@ end $$;
 -- 7. Parent/student roles must never satisfy the server-side generic permission helper.
 do $$
 begin
-  if exists (
-    select 1 from public.roles where key in ('parent','student') and scope <> 'school'
-  ) then
+  if exists (select 1 from public.roles where key in ('parent','student') and scope <> 'school') then
     raise exception 'RBAC FAIL: parent/student role has unexpected scope';
   end if;
 end $$;
 
 -- 8. The production admin model requires explicit school + organization role assignments.
--- This assertion is structural: it does not depend on test data being present.
 do $$
 begin
   if not exists (select 1 from public.roles where key = 'admin' and scope = 'school') then
@@ -104,6 +101,27 @@ begin
   end if;
   if not exists (select 1 from public.roles where key = 'organization_admin' and scope = 'organization') then
     raise exception 'RBAC FAIL: organization admin role missing';
+  end if;
+end $$;
+
+-- 9. Verify the existing Cambridge admin has core school-operational permissions
+-- while parent-only access and another school's permissions remain denied.
+do $$
+begin
+  if not private.actor_has_permission('9e8974fc-4e89-488f-a094-92d9e0e47894','student.manage','0f531d29-cf28-41f3-9b54-8272adf29b2b') then
+    raise exception 'RBAC FAIL: Cambridge admin missing student.manage';
+  end if;
+  if not private.actor_has_permission('9e8974fc-4e89-488f-a094-92d9e0e47894','attendance.manage','0f531d29-cf28-41f3-9b54-8272adf29b2b') then
+    raise exception 'RBAC FAIL: Cambridge admin missing attendance.manage';
+  end if;
+  if not private.actor_has_permission('9e8974fc-4e89-488f-a094-92d9e0e47894','exam.manage','0f531d29-cf28-41f3-9b54-8272adf29b2b') then
+    raise exception 'RBAC FAIL: Cambridge admin missing exam.manage';
+  end if;
+  if private.actor_has_permission('9e8974fc-4e89-488f-a094-92d9e0e47894','parent.view','0f531d29-cf28-41f3-9b54-8272adf29b2b') then
+    raise exception 'RBAC FAIL: Cambridge admin unexpectedly has parent.view';
+  end if;
+  if private.actor_has_permission('9e8974fc-4e89-488f-a094-92d9e0e47894','student.manage','877b4b0d-374d-49d1-a91b-2b768d678aa8') then
+    raise exception 'RBAC FAIL: Cambridge admin unexpectedly has Shah student.manage';
   end if;
 end $$;
 
@@ -118,3 +136,8 @@ select
   (select count(*) from public.organization_memberships) as organization_memberships;
 
 rollback;
+
+-- Production observation (intentional until product policy changes):
+-- the school 'admin' role currently does not carry finance.manage, school.manage,
+-- settings.manage, or ai.approve. Finance operations use finance.manage and are
+-- therefore restricted from this role. Do not broaden permissions silently.
