@@ -91,7 +91,7 @@ export default function CsvSetupForm() {
         throw new Error(commitBody.error ?? "School CSV import failed");
       }
 
-      router.replace(\`/?schoolId=\${encodeURIComponent(schoolId)}\`);
+      router.replace(`/?schoolId=${encodeURIComponent(schoolId)}`);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to create the school from CSV.");
@@ -128,7 +128,7 @@ export default function CsvSetupForm() {
           <strong>{preview.valid ? "CSV ready" : "Fix CSV"}</strong>
           <span>
             {preview.valid
-              ? \`\${preview.rowsParsed ?? 0} rows validated. School data is ready to be created.\`
+              ? `${preview.rowsParsed ?? 0} rows validated. School data is ready to be created.`
               : (preview.errors ?? []).slice(0, 8).join(" • ")}
           </span>
         </div>
