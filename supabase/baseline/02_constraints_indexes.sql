@@ -1,4 +1,4 @@
--- Production constraints and indexes snapshot; generated 2026-09-22.
+-- Production constraints and non-constraint indexes snapshot; generated 2026-09-22.
 -- DATA-FREE. Ordered so keys/checks exist before foreign keys.
 
 ALTER TABLE public.academic_years ADD CONSTRAINT academic_years_pkey PRIMARY KEY (id);
@@ -376,39 +376,3 @@ CREATE INDEX user_roles_org_idx ON public.user_roles USING btree (organization_i
 CREATE INDEX user_roles_role_idx ON public.user_roles USING btree (role_id);
 CREATE INDEX user_roles_school_idx ON public.user_roles USING btree (school_id) WHERE (school_id IS NOT NULL);
 CREATE INDEX user_roles_user_idx ON public.user_roles USING btree (user_id);
-CREATE UNIQUE INDEX academic_years_school_id_name_key ON public.academic_years USING btree (school_id, name);
-CREATE UNIQUE INDEX ai_agents_organization_id_slug_key ON public.ai_agents USING btree (organization_id, slug);
-CREATE UNIQUE INDEX ai_execution_runs_school_id_idempotency_key_key ON public.ai_execution_runs USING btree (school_id, idempotency_key);
-CREATE UNIQUE INDEX ai_execution_steps_run_id_step_order_key ON public.ai_execution_steps USING btree (run_id, step_order);
-CREATE UNIQUE INDEX ai_tool_permissions_tool_id_role_id_key ON public.ai_tool_permissions USING btree (tool_id, role_id);
-CREATE UNIQUE INDEX ai_tools_organization_id_slug_key ON public.ai_tools USING btree (organization_id, slug);
-CREATE UNIQUE INDEX attendance_records_session_id_enrollment_id_key ON public.attendance_records USING btree (session_id, enrollment_id);
-CREATE UNIQUE INDEX attendance_sessions_school_id_academic_year_id_section_id_a_key ON public.attendance_sessions USING btree (school_id, academic_year_id, section_id, attendance_date);
-CREATE UNIQUE INDEX communication_recipients_campaign_id_guardian_id_staff_id_key ON public.communication_recipients USING btree (campaign_id, guardian_id, staff_id);
-CREATE UNIQUE INDEX curriculum_units_grade_id_subject_id_sequence_no_key ON public.curriculum_units USING btree (grade_id, subject_id, sequence_no);
-CREATE UNIQUE INDEX exam_results_exam_subject_id_enrollment_id_key ON public.exam_results USING btree (exam_subject_id, enrollment_id);
-CREATE UNIQUE INDEX exam_subjects_exam_id_subject_id_key ON public.exam_subjects USING btree (exam_id, subject_id);
-CREATE UNIQUE INDEX exams_school_id_academic_year_id_name_key ON public.exams USING btree (school_id, academic_year_id, name);
-CREATE UNIQUE INDEX fee_invoices_school_id_invoice_number_key ON public.fee_invoices USING btree (school_id, invoice_number);
-CREATE UNIQUE INDEX fee_payments_school_id_receipt_number_key ON public.fee_payments USING btree (school_id, receipt_number);
-CREATE UNIQUE INDEX fee_structures_school_id_academic_year_id_name_grade_id_key ON public.fee_structures USING btree (school_id, academic_year_id, name, grade_id);
-CREATE UNIQUE INDEX grades_school_id_name_key ON public.grades USING btree (school_id, name);
-CREATE UNIQUE INDEX import_rows_batch_id_row_number_key ON public.import_rows USING btree (batch_id, row_number);
-CREATE UNIQUE INDEX leave_type_code_unique ON public.leave_types USING btree (school_id, code);
-CREATE UNIQUE INDEX organization_memberships_organization_id_user_id_key ON public.organization_memberships USING btree (organization_id, user_id);
-CREATE UNIQUE INDEX organizations_slug_key ON public.organizations USING btree (slug);
-CREATE UNIQUE INDEX permissions_key_key ON public.permissions USING btree (key);
-CREATE UNIQUE INDEX roles_key_key ON public.roles USING btree (key);
-CREATE UNIQUE INDEX school_database_provisioning_database_key_key ON public.school_database_provisioning USING btree (database_key);
-CREATE UNIQUE INDEX school_database_provisioning_school_id_key ON public.school_database_provisioning USING btree (school_id);
-CREATE UNIQUE INDEX school_memberships_school_id_user_id_key ON public.school_memberships USING btree (school_id, user_id);
-CREATE UNIQUE INDEX school_onboarding_profiles_school_id_key ON public.school_onboarding_profiles USING btree (school_id);
-CREATE UNIQUE INDEX schools_organization_id_code_key ON public.schools USING btree (organization_id, code);
-CREATE UNIQUE INDEX sections_school_id_grade_id_name_key ON public.sections USING btree (school_id, grade_id, name);
-CREATE UNIQUE INDEX staff_employee_number_unique ON public.staff_members USING btree (school_id, employee_number);
-CREATE UNIQUE INDEX student_enrollments_student_id_academic_year_id_key ON public.student_enrollments USING btree (student_id, academic_year_id);
-CREATE UNIQUE INDEX student_fee_assignments_enrollment_id_fee_structure_id_key ON public.student_fee_assignments USING btree (enrollment_id, fee_structure_id);
-CREATE UNIQUE INDEX students_school_id_admission_number_key ON public.students USING btree (school_id, admission_number);
-CREATE UNIQUE INDEX subjects_school_id_code_key ON public.subjects USING btree (school_id, code);
-CREATE UNIQUE INDEX subjects_school_id_name_key ON public.subjects USING btree (school_id, name);
-CREATE UNIQUE INDEX timetable_entries_section_id_day_of_week_period_no_key ON public.timetable_entries USING btree (section_id, day_of_week, period_no);
