@@ -22,6 +22,27 @@ School -> Admin -> Academic year -> Grades/Sections -> Students -> Teacher -> At
 
 Every step must succeed without manual database intervention.
 
+### Golden-path harness
+
+A rollback-only SQL integration harness is now committed at `scripts/golden-path.sql`.
+
+It exercises the database/RPC workflow for:
+
+- academic year
+- grade and section
+- subject
+- student and enrollment
+- attendance
+- exam and exam subject
+- exam results
+- fee structure and student fee assignment
+- invoice and payment
+- AI tool catalog/authorization
+
+The harness intentionally rolls back all writes. It is a verification aid, not a production seed.
+
+**Important:** the harness does not yet constitute a passed commercial Golden Path. A clean test/preview database run still needs to be executed end-to-end, including the parent identity/dashboard and the HTTP gateway layer.
+
 ## Gate 3 — Reliability
 
 - [ ] Typecheck
@@ -67,6 +88,8 @@ As of 2026-09-22:
 - CI: typecheck + build + production health smoke test
 - Supabase: production migration history contains the complete historical sequence, while the repository contains only a subset; migration source-of-truth reconciliation remains open
 - Supabase security advisor: 13 RLS-enabled/no-policy tables and leaked-password protection disabled
+- Golden-path harness: committed, rollback-only, not yet a passed end-to-end commercial test
+- Production currently has two schools but no students/staff records, so real-school workflow coverage is still unproven
 - Commercial status: pilot-ready foundation, not yet broad-launch ready
 
 ## Working Rule
