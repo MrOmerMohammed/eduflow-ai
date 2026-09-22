@@ -84,13 +84,14 @@ export async function PUT(request:Request){
    if(!teacherUserId || !day || !period) continue;
    const yearName=String(row.academic_year??"").trim(), gradeName=String(row.grade??"").trim(), sectionName=String(row.section??"").trim(), subjectName=String(row.subject??"").trim();
    if(!subjectName) continue;
-   const [{data:year},{data:grade},{data:section},{data:subject}]=await Promise.all([
+   const [{data:year},{data:grade},{data:subject}]=await Promise.all([
     admin.from("academic_years").select("id").eq("school_id",schoolId).eq("name",yearName).maybeSingle(),
     admin.from("grades").select("id").eq("school_id",schoolId).eq("name",gradeName).maybeSingle(),
-    admin.from("sections").select("id").eq("school_id",schoolId).eq("grade_id",grade?.id ?? "").eq("name",sectionName).maybeSingle(),
     admin.from("subjects").select("id").eq("school_id",schoolId).eq("name",subjectName).maybeSingle()
    ]);
-   if(!section?.id || !subject?.id) continue;
+   if(!grade?.id || !subject?.id) continue;
+   const {data:section}=await admin.from("sections").select("id").eq("school_id",schoolId).eq("grade_id",grade.id).eq("name",sectionName).maybeSingle();
+   if(!section?.id) continue;
    const {data:exists}=await admin.from("timetable_entries").select("id").eq("school_id",schoolId).eq("section_id",section.id).eq("subject_id",subject.id).eq("teacher_user_id",teacherUserId).eq("day_of_week",day).eq("period_no",period).maybeSingle();
    if(exists) continue;
    const {error:ttError}=await admin.from("timetable_entries").insert({school_id:schoolId,section_id:section.id,subject_id:subject.id,teacher_user_id:teacherUserId,day_of_week:day,period_no:period,starts_at:row.timetable_start||null,ends_at:row.timetable_end||null,room:row.timetable_room||null,is_active:true});
