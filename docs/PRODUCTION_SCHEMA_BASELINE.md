@@ -1,0 +1,86 @@
+# Production Schema Baseline
+
+Generated from Supabase production project `vzgnymdrgylshemjdamg` on 2026-09-22.
+
+## Purpose
+
+This file records the authoritative production database state while the repository is being reconciled with the existing Supabase migration history.
+
+**Important:** this is a non-destructive reconciliation artifact. It does not reset, rewrite, or mark historical Supabase migrations as applied.
+
+## Production snapshot
+
+- PostgreSQL: 17.6
+- Public base tables: 50
+- Functions in `public` + `private`: 64
+- Public indexes: 191
+- Public RLS policies: 51
+- Recorded Supabase migrations: 52
+- Latest migration: `20260920182753_harden_workspace_bootstrap`
+
+## Migration history
+
+```text
+20260916180305 foundation_core_tables
+20260916180333 ai_audit_tables
+20260916180353 enable_rls_all_public_tables
+20260916180839 create_private_security_schema
+20260916180848 apply_core_rls_policies
+20260916182002 v1_auth_rbac_permission_engine
+20260916182120 v1_auth_profile_bootstrap
+20260916182145 v1_rbac_performance_index
+20260916185916 v2_school_management_gateway
+20260916185943 v2_gateway_function_hardening
+20260916191631 v2_harden_gateway_search_path
+20260916191657 v2_finalize_gateway_function_hardening
+20260916192221 v3_student_information_system_gateway
+20260916192226 v3_fix_student_policy_function_grant
+20260916194843 fix_bootstrap_school_workspace_role_scope
+20260917045250 v4_attendance_engine
+20260917050551 v4_attendance_security_and_rpc
+20260917051323 v4_attendance_contract_and_rate_fix
+20260917051928 v5_academic_curriculum_timetable
+20260917052010 v5_academic_gateway_functions
+20260917052140 v5_fix_academic_permission_helper
+20260917052910 v6_exams_assessment
+20260917052924 v6_exam_security_rpcs
+20260917053600 v6_exam_validation_hardening
+20260917060001 v7_fee_management_finance
+20260917061855 v8_staff_hr
+20260917061947 v8_staff_hr_leave_type_rpc
+20260917062042 v8_staff_role_permissions
+20260918065641 v9_communication_center
+20260918071456 v10_notification_center
+20260918071507 v10_communication_notification_bridge
+20260918071811 v10_notification_audit_hardening
+20260918112651 v11_parent_management_portal
+20260918114938 v11_fix_parent_permission_scope
+20260918115052 v12_analytics_management_intelligence
+20260918115114 v12_harden_analytics_rpc_grants
+20260918115449 v12_analytics_date_filters
+20260918160348 v12_management_intelligence
+20260918161628 v13_safe_data_import_pipeline
+20260918162845 v14_ai_tool_registry_authorization
+20260918164030 v14_ai_execution_planner_ledger
+20260918164045 v14_ai_read_tool_catalog_expansion
+20260918164421 v14_ai_planner_conversation_scope
+20260919084336 add_missing_foreign_key_indexes
+20260919084351 consolidate_staff_select_policies
+20260919084407 remove_duplicate_indexes
+20260919100822 add_multi_step_ai_planning
+20260919161208 school_database_provisioning_trigger
+20260919161230 lock_school_database_trigger_function
+20260920090020 school_onboarding_profiles
+20260920090228 school_onboarding_admin_read_policy
+20260920182753 harden_workspace_bootstrap
+```
+
+## Reconciliation rule
+
+Do not create fake placeholder migrations for the historical versions that are absent from `supabase/migrations/`.
+
+The production database is already populated and must remain intact. The repository should become reproducible by establishing a canonical schema snapshot/baseline, then all future changes must be represented by real repository migrations.
+
+## Next implementation step
+
+Create an executable canonical schema snapshot from production and use it as the clean-database bootstrap baseline. After that, add CI drift verification so a new migration cannot be merged without corresponding source-controlled schema changes.
