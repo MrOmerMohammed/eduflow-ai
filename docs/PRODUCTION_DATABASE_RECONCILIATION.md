@@ -10,7 +10,7 @@ This is a source-control/reproducibility risk. It does not mean production shoul
 
 ## Production migration history
 
-Production currently reports 53 migration versions, including the original foundation, auth/RBAC, student, attendance, academic, exams, finance, HR, communication, notifications, parent, analytics, import, AI, indexing, provisioning, onboarding and workspace-hardening migrations.
+Production currently reports 52 migration versions, including the original foundation, auth/RBAC, student, attendance, academic, exams, finance, HR, communication, notifications, parent, analytics, import, AI, indexing, provisioning, onboarding and workspace-hardening migrations.
 
 Latest production migration:
 
@@ -30,6 +30,22 @@ The repository currently contains these migration files:
 - 20260920130000_security_integrity_hardening.sql
 - 20260920182753_harden_workspace_bootstrap.sql
 
+## Canonical baseline added (2026-09-22)
+
+A data-free production schema baseline is now committed under `supabase/baseline/`. It captures production tables, constraints/indexes, RLS/policies, private/public functions, and triggers without copying production data or fabricating the missing historical migrations.
+
+Baseline files:
+
+- `01_tables.sql`
+- `02_constraints_indexes.sql`
+- `03_rls_policies.sql`
+- `04_private_functions.sql`
+- `04_public_functions_1_20.sql`
+- `04_public_functions_21_40.sql`
+- `04_public_functions_41_60.sql`
+- `04_public_functions_61_80.sql`
+- `09_triggers.sql`
+
 ## Required resolution
 
 Before broad commercial launch, choose and document one canonical database source-of-truth strategy.
@@ -46,6 +62,6 @@ Recommended approach:
 
 ## Current gate
 
-OPEN — migration reproducibility is not yet proven.
+PARTIALLY CLOSED — production schema is now captured as a canonical, data-free baseline. Full reproducibility remains to be proven by replaying the baseline on a clean database and running the Golden Path harness.
 
 The application can continue to operate on the existing production database, but this gate must close before claiming full commercial readiness.
