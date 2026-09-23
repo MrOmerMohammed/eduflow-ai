@@ -11,7 +11,10 @@ const rpcMapEnd = routeSource.indexOf("if(rpcMap[body.action])", rpcMapStart);
 const rpcSource = rpcMapStart >= 0 && rpcMapEnd > rpcMapStart
   ? routeSource.slice(rpcMapStart, rpcMapEnd)
   : "";
-const rpcKeys = [...rpcSource.matchAll(/"([a-z0-9_.]+)"\s*:\s*\[/g)].map((m) => m[1]);
+// Gateway action keys are namespaced (for example `subject.create`). Requiring
+// a namespace separator prevents nested payload/type keys such as `string`
+// from being mistaken for top-level rpcMap actions.
+const rpcKeys = [...rpcSource.matchAll(/"([a-z0-9_]+\.[a-z0-9_.]+)"\s*:\s*\[/g)].map((m) => m[1]);
 
 const implementedSet = new Set([...implemented, ...rpcKeys]);
 const declaredSet = new Set(declared);
