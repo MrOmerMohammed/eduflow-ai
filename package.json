@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "contract:test": "node scripts/api-contract-gate.mjs"
+    "contract:test": "node scripts/api-contract-gate.mjs",
+    "pilot:structure": "node scripts/school-pilot-structure-gate.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.7.0",

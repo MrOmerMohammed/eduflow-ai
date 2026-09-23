@@ -30,6 +30,9 @@ jobs:
       - name: API contract gate
         run: npm run contract:test
 
+      - name: School-pilot structure gate
+        run: npm run pilot:structure
+
       - name: Production build
         run: npm run build
 
