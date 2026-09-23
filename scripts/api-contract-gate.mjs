@@ -4,7 +4,9 @@ const typesSource = readFileSync("src/lib/gateway/types.ts", "utf8");
 const routeSource = readFileSync("src/app/api/gateway/route.ts", "utf8");
 
 const declared = [...typesSource.matchAll(/\|\s*"([a-z0-9_.]+)"/g)].map((m) => m[1]);
-const implemented = [...routeSource.matchAll(/body\.action\s*===\s*(["'])([^"']+)\1/g)].map((m) => m[2]);
+// Match actual action conditionals only. A generic `body.action === "..."`
+// search also captures the type guard `typeof body.action === "string"`.
+const implemented = [...routeSource.matchAll(/if\s*\(\s*body\.action\s*===\s*(["'])([^"']+)\1\s*\)/g)].map((m) => m[2]);
 
 const rpcMapStart = routeSource.indexOf("const rpcMap");
 const rpcMapEnd = routeSource.indexOf("if(rpcMap[body.action])", rpcMapStart);
@@ -12,8 +14,8 @@ const rpcSource = rpcMapStart >= 0 && rpcMapEnd > rpcMapStart
   ? routeSource.slice(rpcMapStart, rpcMapEnd)
   : "";
 // Gateway action keys are namespaced (for example `subject.create`). Requiring
-// a namespace separator prevents nested payload/type keys such as `string`
-// from being mistaken for top-level rpcMap actions.
+// a namespace separator prevents nested payload/type keys from being mistaken
+// for top-level rpcMap actions.
 const rpcKeys = [...rpcSource.matchAll(/"([a-z0-9_]+\.[a-z0-9_.]+)"\s*:\s*\[/g)].map((m) => m[1]);
 
 const implementedSet = new Set([...implemented, ...rpcKeys]);
