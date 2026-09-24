@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignUpPage() {
-  const router = useRouter(); const supabase = createClient();
+  const router = useRouter();
   const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [name, setName] = useState("");
   const [message, setMessage] = useState<string | null>(null); const [error, setError] = useState<string | null>(null); const [submitting, setSubmitting] = useState(false);
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (submitting) return; setSubmitting(true); setError(null); setMessage(null);
+    const supabase = createClient();
     const { data, error: signUpError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
     if (signUpError) { setError(signUpError.message); setSubmitting(false); return; }
     if (data.session) { router.replace("/setup"); return; } setMessage("Account created. Check your email to confirm your account before signing in."); setSubmitting(false);
