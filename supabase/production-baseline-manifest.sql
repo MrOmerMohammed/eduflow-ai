@@ -1,5 +1,5 @@
 -- EduFlow AI production schema reconciliation manifest
--- Generated: 2026-09-22
+-- Generated: 2026-09-24
 -- Project: vzgnymdrgylshemjdamg
 -- This file is intentionally verification-only. It does NOT mutate production.
 
@@ -12,11 +12,11 @@ select
   (select count(*) from supabase_migrations.schema_migrations) as migration_count,
   (select max(version) from supabase_migrations.schema_migrations) as latest_migration;
 
--- Expected production snapshot:
+-- Verified production snapshot (2026-09-24):
 -- PostgreSQL 17.6
 -- public tables: 50
 -- functions (public + private): 64
 -- public indexes: 191
 -- public RLS policies: 51
--- migrations: 52
--- latest migration: 20260920182753
+-- migrations: 53
+-- latest migration: 20260922104535
