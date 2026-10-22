@@ -14,6 +14,22 @@ if(body.action==="school.role.assign"){
   const email=stringValue(payload,"email").trim().toLowerCase();
   const roleKey=stringValue(payload,"role");
   if(!["admin","teacher","staff"].includes(roleKey)) throw new Error("Invalid school role");
+
+  // Authorize before calling the Auth Admin API. Otherwise a non-admin could
+  // trigger invitation emails even though the later role-assignment RPC rejects them.
+  const {data:actorMembership,error:actorMembershipError}=await supabase
+    .from("school_memberships")
+    .select("school_id,role,status,schools(id,status)")
+    .eq("school_id",schoolId)
+    .eq("user_id",userId)
+    .eq("status","active")
+    .maybeSingle();
+  if(actorMembershipError) throw new Error(actorMembershipError.message);
+  const actorSchool=Array.isArray(actorMembership?.schools)?actorMembership.schools[0]:actorMembership?.schools;
+  if(!actorMembership || actorMembership.role!=="admin" || !actorSchool || actorSchool.status!=="active"){
+    return NextResponse.json({error:"Only active school administrators can assign roles"},{status:403});
+  }
+
   let targetUserId:string|null=null;
   const usersResult=await admin.auth.admin.listUsers({page:1,perPage:1000});
   if(usersResult.error) throw new Error(usersResult.error.message);
