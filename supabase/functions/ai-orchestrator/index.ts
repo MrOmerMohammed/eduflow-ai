@@ -76,6 +76,28 @@ async function runTool(handler: string, schoolId: string, input: any, previous: 
     return { student, enrollments: enrollments ?? [] };
   }
   if (handler === "attendance_student") {
+    const hasStudentContext = Boolean(input?.student_ref) || previous.some((p: any) => p?.result && (Object.prototype.hasOwnProperty.call(p.result, "students") || Object.prototype.hasOwnProperty.call(p.result, "student")));
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString().slice(0, 10);
+    const context = typeof input?.date_context === "string" ? input.date_context : "today";
+    if (!hasStudentContext) {
+      let sessionsQuery = admin.from("attendance_sessions").select("id,attendance_date,section_id,status").eq("school_id", schoolId).order("attendance_date", { ascending: false }).limit(200);
+      if (context === "today") sessionsQuery = sessionsQuery.eq("attendance_date", today);
+      else if (context === "this_week") {
+        const from = new Date(now); from.setUTCDate(from.getUTCDate() - 6);
+        sessionsQuery = sessionsQuery.gte("attendance_date", from.toISOString().slice(0, 10)).lte("attendance_date", today);
+      } else if (context === "this_month") sessionsQuery = sessionsQuery.gte("attendance_date", `${today.slice(0, 7)}-01`).lte("attendance_date", today);
+      const { data: sessions, error: sessionError } = await sessionsQuery;
+      if (sessionError) throw sessionError;
+      const sessionIds = (sessions ?? []).map((s: any) => s.id);
+      const { data: records, error: recordError } = sessionIds.length
+        ? await admin.from("attendance_records").select("status").eq("school_id", schoolId).in("session_id", sessionIds)
+        : { data: [], error: null };
+      if (recordError) throw recordError;
+      const counts: Record<string, number> = { present: 0, absent: 0, late: 0, excused: 0, other: 0 };
+      for (const row of records ?? []) counts[counts[String(row.status)] !== undefined ? String(row.status) : "other"] += 1;
+      return { scope: "school", date_context: context, date: context === "today" ? today : undefined, session_count: (sessions ?? []).length, record_count: (records ?? []).length, counts };
+    }
     const student = await resolveStudent(schoolId, input, previous);
     if (!student) throw new Error("Student not found in this school.");
     const { data, error } = await admin.from("attendance_records")
@@ -83,23 +105,36 @@ async function runTool(handler: string, schoolId: string, input: any, previous: 
       .eq("school_id", schoolId).eq("student_id", student.id).order("marked_at", { ascending: false }).limit(100);
     if (error) throw error;
     let records = data ?? [];
-    const context = input?.date_context;
     if (context) {
-      const today = new Date();
-      const day = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString().slice(0, 10);
-      if (context === "today") records = records.filter((r: any) => r.attendance_sessions?.attendance_date === day);
+      if (context === "today") records = records.filter((r: any) => r.attendance_sessions?.attendance_date === today);
       else if (context === "this_week") {
-        const from = new Date(today); from.setUTCDate(from.getUTCDate() - 6);
+        const from = new Date(now); from.setUTCDate(from.getUTCDate() - 6);
         const start = from.toISOString().slice(0, 10);
-        records = records.filter((r: any) => r.attendance_sessions?.attendance_date >= start && r.attendance_sessions?.attendance_date <= day);
+        records = records.filter((r: any) => r.attendance_sessions?.attendance_date >= start && r.attendance_sessions?.attendance_date <= today);
       } else if (context === "this_month") {
-        const start = `${day.slice(0, 7)}-01`;
-        records = records.filter((r: any) => r.attendance_sessions?.attendance_date >= start && r.attendance_sessions?.attendance_date <= day);
+        const start = `${today.slice(0, 7)}-01`;
+        records = records.filter((r: any) => r.attendance_sessions?.attendance_date >= start && r.attendance_sessions?.attendance_date <= today);
       }
     }
     return { student: { id: student.id, name: [student.first_name, student.middle_name, student.last_name].filter(Boolean).join(" "), admission_number: student.admission_number }, records, count: records.length };
   }
   if (handler === "finance_student_balance") {
+    const hasStudentContext = Boolean(input?.student_ref) || previous.some((p: any) => p?.result && (Object.prototype.hasOwnProperty.call(p.result, "students") || Object.prototype.hasOwnProperty.call(p.result, "student")));
+    if (!hasStudentContext) {
+      const { data: invoices, error: invoiceError } = await admin.from("fee_invoices")
+        .select("id,invoice_number,invoice_date,due_date,subtotal,discount,total,status,enrollment_id")
+        .eq("school_id", schoolId).order("due_date", { ascending: true }).limit(500);
+      if (invoiceError) throw invoiceError;
+      const invoiceIds = (invoices ?? []).map((i: any) => i.id);
+      const { data: payments, error: paymentError } = invoiceIds.length
+        ? await admin.from("fee_payments").select("invoice_id,amount,status,payment_date,receipt_number").eq("school_id", schoolId).in("invoice_id", invoiceIds)
+        : { data: [], error: null };
+      if (paymentError) throw paymentError;
+      const paidByInvoice = new Map<string, number>();
+      for (const payment of payments ?? []) if (!["failed", "cancelled", "voided", "refunded"].includes(String(payment.status ?? "").toLowerCase())) paidByInvoice.set(payment.invoice_id, (paidByInvoice.get(payment.invoice_id) ?? 0) + Number(payment.amount ?? 0));
+      const details = (invoices ?? []).map((invoice: any) => ({ ...invoice, paid: paidByInvoice.get(invoice.id) ?? 0, outstanding: Math.max(0, Number(invoice.total ?? 0) - (paidByInvoice.get(invoice.id) ?? 0)) }));
+      return { scope: "school", invoice_count: details.length, total_invoiced: details.reduce((sum: number, i: any) => sum + Number(i.total ?? 0), 0), total_paid: details.reduce((sum: number, i: any) => sum + i.paid, 0), outstanding: details.reduce((sum: number, i: any) => sum + i.outstanding, 0), invoices: details.slice(0, 50) };
+    }
     const student = await resolveStudent(schoolId, input, previous);
     if (!student) throw new Error("Student not found in this school.");
     const { data: enrollments, error: enrollmentError } = await admin.from("student_enrollments")
@@ -117,38 +152,57 @@ async function runTool(handler: string, schoolId: string, input: any, previous: 
       : { data: [], error: null };
     if (paymentError) throw paymentError;
     const paidByInvoice = new Map<string, number>();
-    for (const payment of payments ?? []) {
-      if (!["failed", "cancelled", "voided", "refunded"].includes(String(payment.status ?? "").toLowerCase())) {
-        paidByInvoice.set(payment.invoice_id, (paidByInvoice.get(payment.invoice_id) ?? 0) + Number(payment.amount ?? 0));
-      }
-    }
+    for (const payment of payments ?? []) if (!["failed", "cancelled", "voided", "refunded"].includes(String(payment.status ?? "").toLowerCase())) paidByInvoice.set(payment.invoice_id, (paidByInvoice.get(payment.invoice_id) ?? 0) + Number(payment.amount ?? 0));
     const details = (invoices ?? []).map((invoice: any) => ({ ...invoice, paid: paidByInvoice.get(invoice.id) ?? 0, outstanding: Math.max(0, Number(invoice.total ?? 0) - (paidByInvoice.get(invoice.id) ?? 0)) }));
-    return { student: { id: student.id, name: [student.first_name, student.middle_name, student.last_name].filter(Boolean).join(" "), admission_number: student.admission_number }, invoice_count: details.length, total_invoiced: details.reduce((sum: number, i: any) => sum + Number(i.total ?? 0), 0), total_paid: details.reduce((sum: number, i: any) => sum + i.paid, 0), outstanding: details.reduce((sum: number, i: any) => sum + i.outstanding, 0), invoices: details };
+    return { student: { id: student.id, name: [student.first_name, student.last_name].filter(Boolean).join(" "), admission_number: student.admission_number }, invoice_count: details.length, total_invoiced: details.reduce((sum: number, i: any) => sum + Number(i.total ?? 0), 0), total_paid: details.reduce((sum: number, i: any) => sum + i.paid, 0), outstanding: details.reduce((sum: number, i: any) => sum + i.outstanding, 0), invoices: details };
   }
   if (handler === "exam_results") {
-    const student = await resolveStudent(schoolId, input, previous);
-    if (!student) throw new Error("Student not found in this school.");
-    const { data: enrollments, error: enrollmentError } = await admin.from("student_enrollments").select("id").eq("school_id", schoolId).eq("student_id", student.id);
-    if (enrollmentError) throw enrollmentError;
-    const enrollmentIds = (enrollments ?? []).map((e: any) => e.id);
-    if (!enrollmentIds.length) return { student: { id: student.id, name: [student.first_name, student.last_name].filter(Boolean).join(" "), admission_number: student.admission_number }, results: [] };
-    const { data: results, error } = await admin.from("exam_results").select("id,exam_subject_id,enrollment_id,marks,grade,remarks,created_at").eq("school_id", schoolId).in("enrollment_id", enrollmentIds).order("created_at", { ascending: false }).limit(100);
+    const hasStudentContext = Boolean(input?.student_ref) || previous.some((p: any) => p?.result && (Object.prototype.hasOwnProperty.call(p.result, "students") || Object.prototype.hasOwnProperty.call(p.result, "student")));
+    let student: any = null;
+    let enrollmentIds: string[] = [];
+    if (hasStudentContext) {
+      student = await resolveStudent(schoolId, input, previous);
+      if (!student) throw new Error("Student not found in this school.");
+      const { data: enrollments, error: enrollmentError } = await admin.from("student_enrollments").select("id").eq("school_id", schoolId).eq("student_id", student.id);
+      if (enrollmentError) throw enrollmentError;
+      enrollmentIds = (enrollments ?? []).map((e: any) => e.id);
+      if (!enrollmentIds.length) return { student: { id: student.id, name: [student.first_name, student.last_name].filter(Boolean).join(" "), admission_number: student.admission_number }, results: [] };
+    }
+    let resultsQuery = admin.from("exam_results").select("id,exam_subject_id,enrollment_id,marks,grade,remarks,created_at").eq("school_id", schoolId).order("created_at", { ascending: false }).limit(100);
+    if (hasStudentContext) resultsQuery = resultsQuery.in("enrollment_id", enrollmentIds);
+    const { data: results, error } = await resultsQuery;
     if (error) throw error;
     const subjectIds = [...new Set((results ?? []).map((x: any) => x.exam_subject_id))];
-    const { data: examSubjects, error: subjectError } = subjectIds.length ? await admin.from("exam_subjects").select("id,exam_id,subject_id,exam_date,max_marks,pass_marks").eq("school_id", schoolId).in("id", subjectIds) : { data: [], error: null };
+    const enrollmentRefs = [...new Set((results ?? []).map((x: any) => x.enrollment_id))];
+    const [{ data: examSubjects, error: subjectError }, { data: allEnrollments, error: allEnrollmentError }] = await Promise.all([
+      subjectIds.length ? admin.from("exam_subjects").select("id,exam_id,subject_id,exam_date,max_marks,pass_marks").eq("school_id", schoolId).in("id", subjectIds) : { data: [], error: null },
+      (!hasStudentContext && enrollmentRefs.length) ? admin.from("student_enrollments").select("id,student_id").eq("school_id", schoolId).in("id", enrollmentRefs) : { data: [], error: null },
+    ]);
     if (subjectError) throw subjectError;
+    if (allEnrollmentError) throw allEnrollmentError;
     const examIds = [...new Set((examSubjects ?? []).map((x: any) => x.exam_id))];
     const curriculumIds = [...new Set((examSubjects ?? []).map((x: any) => x.subject_id))];
-    const [{ data: exams, error: examsError }, { data: subjects, error: subjectsError }] = await Promise.all([
+    const studentIds = [...new Set((allEnrollments ?? []).map((x: any) => x.student_id))];
+    const [{ data: exams, error: examsError }, { data: subjects, error: subjectsError }, { data: schoolStudents, error: studentsError }] = await Promise.all([
       examIds.length ? admin.from("exams").select("id,name,exam_type,start_date,end_date").eq("school_id", schoolId).in("id", examIds) : { data: [], error: null },
       curriculumIds.length ? admin.from("subjects").select("id,name,code").eq("school_id", schoolId).in("id", curriculumIds) : { data: [], error: null },
+      studentIds.length ? admin.from("students").select("id,first_name,last_name,admission_number").eq("school_id", schoolId).in("id", studentIds) : { data: [], error: null },
     ]);
     if (examsError) throw examsError;
     if (subjectsError) throw subjectsError;
+    if (studentsError) throw studentsError;
     const examMap = new Map((exams ?? []).map((x: any) => [x.id, x]));
     const subjectMap = new Map((subjects ?? []).map((x: any) => [x.id, x]));
     const examSubjectMap = new Map((examSubjects ?? []).map((x: any) => [x.id, x]));
-    return { student: { id: student.id, name: [student.first_name, student.last_name].filter(Boolean).join(" "), admission_number: student.admission_number }, results: (results ?? []).map((row: any) => { const es: any = examSubjectMap.get(row.exam_subject_id); return { ...row, exam: examMap.get(es?.exam_id) ?? null, subject: subjectMap.get(es?.subject_id) ?? null, exam_date: es?.exam_date ?? null, max_marks: es?.max_marks ?? null, pass_marks: es?.pass_marks ?? null }; }) };
+    const enrollmentMap = new Map((allEnrollments ?? []).map((x: any) => [x.id, x]));
+    const studentMap = new Map((schoolStudents ?? []).map((x: any) => [x.id, x]));
+    const rows = (results ?? []).map((row: any) => {
+      const es: any = examSubjectMap.get(row.exam_subject_id);
+      const enrollment: any = enrollmentMap.get(row.enrollment_id);
+      const studentRow: any = studentMap.get(enrollment?.student_id);
+      return { ...row, student: student ? { name: [student.first_name, student.last_name].filter(Boolean).join(" "), admission_number: student.admission_number } : (studentRow ? { name: [studentRow.first_name, studentRow.last_name].filter(Boolean).join(" "), admission_number: studentRow.admission_number } : null), exam: examMap.get(es?.exam_id) ?? null, subject: subjectMap.get(es?.subject_id) ?? null, exam_date: es?.exam_date ?? null, max_marks: es?.max_marks ?? null, pass_marks: es?.pass_marks ?? null };
+    });
+    return hasStudentContext ? { student: { id: student.id, name: [student.first_name, student.last_name].filter(Boolean).join(" "), admission_number: student.admission_number }, results: rows } : { scope: "school", result_count: rows.length, results: rows };
   }
   if (handler === "timetable_lookup") {
     const { data: entries, error } = await admin.from("timetable_entries")
