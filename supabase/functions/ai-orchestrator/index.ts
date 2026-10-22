@@ -302,7 +302,7 @@ Deno.serve(async (req: Request) => {
         const handler = typeof tool?.handler_key === "string" ? tool.handler_key : "";
         const result = await runTool(handler, schoolId, step.input ?? plan.input ?? {}, results);
         const completed = new Date().toISOString();
-        await admin.from("ai_execution_steps").update({ status: "completed", output: result, error_message: null, completed_at: completed }).eq("run_id", plan.run_id).eq("step_order", step.order);
+        await admin.from("ai_execution_steps").update({ status: "succeeded", output: result, error_message: null, completed_at: completed }).eq("run_id", plan.run_id).eq("step_order", step.order);
         results.push({ order: step.order, tool: tool?.name ?? tool?.slug ?? handler, result });
       } catch (error) {
         const completed = new Date().toISOString();
@@ -315,7 +315,7 @@ Deno.serve(async (req: Request) => {
     const finished = new Date().toISOString();
     const resultPayload = { steps: results };
     const { error: updateError } = await admin.from("ai_execution_runs").update({
-      status: failed ? "failed" : "completed", result: resultPayload, updated_at: finished, completed_at: finished,
+      status: failed ? "failed" : "succeeded", result: resultPayload, updated_at: finished, completed_at: finished,
     }).eq("id", plan.run_id).eq("school_id", schoolId).eq("user_id", user.id);
     if (updateError) throw updateError;
     const assistantContent = failed ? "Some parts of your request could not be completed. Review the step results." : "Request completed. Review the results below.";
@@ -323,7 +323,7 @@ Deno.serve(async (req: Request) => {
       { conversation_id: activeConversationId, role: "user", content: message },
       { conversation_id: activeConversationId, role: "assistant", content: assistantContent, tool_result: resultPayload },
     ]);
-    return json({ ok: !failed, plan: { ...plan, status: failed ? "failed" : "completed" }, steps: results, result: results[0]?.result, conversationId: activeConversationId, error: failed ? assistantContent : undefined });
+    return json({ ok: !failed, plan: { ...plan, status: failed ? "failed" : "succeeded" }, steps: results, result: results[0]?.result, conversationId: activeConversationId, error: failed ? assistantContent : undefined });
   } catch (error) {
     console.error("ai-orchestrator failed", error);
     return json({ error: "AI request could not be completed. Please retry or contact your school administrator." }, 500);
