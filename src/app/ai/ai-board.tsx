@@ -48,7 +48,7 @@ export default function AiBoard({schoolId,school,role="admin"}:{schoolId:string;
  const nav=SCHOOL_NAV.filter(item=>(item.roles as readonly string[]).includes(role));
  const plan=data?.plan;
  const steps=plan?.steps||[];
- const lastResult=useMemo(()=>data?.steps?.find(s=>s.result!==undefined)||null,[data]);
+ const lastResult=useMemo(()=>data?.steps?.slice().reverse().find(s=>s.result!==undefined)||null,[data]);
 
  const ask=async()=>{
   const request=message.trim();if(!request||loading)return;
@@ -87,7 +87,7 @@ export default function AiBoard({schoolId,school,role="admin"}:{schoolId:string;
 
    <section className="ai-hero">
     <div className="ai-hero-copy"><span className="ai-kicker">EDUFLOW AI</span><h2>Your school assistant</h2><p>Search students, check attendance, review exam results and explore school information without navigating through multiple screens.</p></div>
-    <div className="ai-hero-stats"><div><strong>{history.length/2||0}</strong><span>Requests</span></div><div><strong>{steps.length||0}</strong><span>Steps</span></div><div><strong>{data?.plan?.authorization?.allowed?"Ready":"—"}</strong><span>Authorization</span></div></div>
+    <div className="ai-hero-stats"><div><strong>{history.length/2||0}</strong><span>Requests</span></div><div><strong>{steps.length||0}</strong><span>Steps</span></div><div><strong>{steps.length>0&&steps.every((step)=>step.authorization?.allowed)?"Ready":"—"}</strong><span>Authorization</span></div></div>
    </section>
 
    <section className="ai-workspace">
