@@ -267,6 +267,13 @@ Deno.serve(async (req: Request) => {
     const school = Array.isArray(membership?.schools) ? membership.schools[0] : membership?.schools;
     if (!membership || !school || school.status !== "active") return json({ error: "You do not have access to this school workspace." }, 403);
 
+    const windowStart = new Date(Date.now() - 60_000).toISOString();
+    const { count: recentRequests, error: rateLimitError } = await admin.from("ai_execution_runs")
+      .select("id", { count: "exact", head: true })
+      .eq("school_id", schoolId).eq("user_id", user.id).gte("created_at", windowStart);
+    if (rateLimitError) throw rateLimitError;
+    if ((recentRequests ?? 0) >= 20) return json({ error: "Too many AI requests. Please wait a minute and try again." }, 429);
+
     let activeConversationId = conversationId;
     if (activeConversationId && !uuid.test(activeConversationId)) return json({ error: "Invalid conversation ID." }, 400);
     if (!activeConversationId) {
