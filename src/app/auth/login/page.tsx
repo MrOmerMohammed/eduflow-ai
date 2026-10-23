@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -11,6 +11,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "confirmation_link_invalid") {
+      setError("That confirmation link is invalid or expired. Request a fresh email confirmation link or sign in if your email is already confirmed.");
+    }
+  }, []);
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading) return;
@@ -18,9 +25,11 @@ export default function LoginPage() {
     setError(null);
     try {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
       if (signInError) {
-        setError(signInError.message);
+        setError(/invalid login credentials/i.test(signInError.message)
+          ? "Email or password is incorrect. If you recently created this account, use the same password you registered with or reset it."
+          : signInError.message);
         return;
       }
       router.replace("/");
