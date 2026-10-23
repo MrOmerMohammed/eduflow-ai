@@ -18,9 +18,11 @@ export default function LoginPage() {
     setError(null);
     try {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
       if (signInError) {
-        setError(signInError.message);
+        setError(/invalid login credentials/i.test(signInError.message)
+          ? "Email or password is incorrect. If you recently created this account, use the same password you registered with or reset it."
+          : signInError.message);
         return;
       }
       router.replace("/");
