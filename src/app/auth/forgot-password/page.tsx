@@ -11,8 +11,8 @@ export default function ForgotPasswordPage(){
   setBusy(true);setError("");setMessage("");
   try {
    const supabase=createClient();
-   const {error:resetError}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:`${window.location.origin}/auth/reset-password`});
-   if(resetError)setError("We could not send the reset email. Please verify the address and try again.");
+   const {error:resetError}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:`${window.location.origin}/auth/reset-password`});
+   if(resetError)setError(/rate limit|too many requests|email send/i.test(resetError.message) ? "Password reset emails are temporarily rate-limited. Please wait before requesting another link, then use only the newest email." : "We could not send the reset email. Please verify the address and try again.");
    else setMessage("If an account exists for this email, a password reset link has been sent.");
   } catch {
    setError("Unable to request a reset link right now. Check your connection and try again.");
