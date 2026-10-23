@@ -18,7 +18,7 @@ function parseCsv(text:string){
  return records;
 }
 function normalizeEmploymentType(value: unknown): string {
- const raw=String(value ?? "").trim().toLowerCase().replace(/[-\\s]+/g,"_");
+ const raw=String(value ?? "").trim().toLowerCase().replace(/[\s-]+/g,"_");
  if(!raw) return "full_time";
  const aliases:Record<string,string>={
   full_time:"full_time",fulltime:"full_time",full:"full_time",
@@ -47,8 +47,8 @@ function parseRows(text:string){
   for(const h of ["date_of_birth","academic_year_start","academic_year_end","teacher_joining_date"]) if(r[h]&&Number.isNaN(Date.parse(String(r[h])))) errors.push(`Row ${line}: invalid ${h}`);
   if(r.teacher_email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(r.teacher_email))) errors.push(`Row ${line}: invalid teacher_email`);
   if(r.timetable_day){ const day=String(r.timetable_day).trim().toLowerCase(); if(!["mon","monday","tue","tuesday","wed","wednesday","thu","thursday","fri","friday","sat","saturday","sun","sunday","1","2","3","4","5","6","7"].includes(day)) errors.push(`Row ${line}: invalid timetable_day`); }
-  if(r.timetable_period && (!/^\\d+$/.test(String(r.timetable_period)) || Number(r.timetable_period)<1)) errors.push(`Row ${line}: timetable_period must be a positive number`);
-  for(const h of ["timetable_start","timetable_end"]) if(r[h] && !/^\\d{1,2}:\\d{2}$/.test(String(r[h]).trim())) errors.push(`Row ${line}: invalid ${h} (use HH:MM)`);
+  if(r.timetable_period && (!/^\d+$/.test(String(r.timetable_period)) || Number(r.timetable_period)<1)) errors.push(`Row ${line}: timetable_period must be a positive number`);
+  for(const h of ["timetable_start","timetable_end"]) if(r[h] && !/^\d{1,2}:\d{2}$/.test(String(r[h]).trim())) errors.push(`Row ${line}: invalid ${h} (use HH:MM)`);
   if(r.teacher_employment_type){ const normalized=normalizeEmploymentType(r.teacher_employment_type); if(!normalized) errors.push(`Row ${line}: teacher_employment_type must be Full Time, Part Time, Contract, Temporary, or Intern`); else r.teacher_employment_type=normalized; }
  });
  return {rows,errors,headers};
