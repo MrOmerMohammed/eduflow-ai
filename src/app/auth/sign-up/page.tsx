@@ -25,7 +25,9 @@ export default function SignUpPage() {
         },
       });
       if (signUpError) {
-        setError(signUpError.message);
+        setError(/rate limit|too many requests|email send/i.test(signUpError.message)
+          ? "Supabase is temporarily limiting confirmation emails. Please wait before trying again; repeated attempts will not bypass the limit."
+          : signUpError.message);
         return;
       }
       if (data.session) {
