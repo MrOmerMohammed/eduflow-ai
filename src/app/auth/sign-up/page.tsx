@@ -17,9 +17,12 @@ export default function SignUpPage() {
     try {
       const supabase = createClient();
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
+        email: email.trim().toLowerCase(),
         password,
-        options: { data: { full_name: name } },
+        options: {
+          data: { full_name: name.trim() },
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/setup`,
+        },
       });
       if (signUpError) {
         setError(signUpError.message);
@@ -29,7 +32,7 @@ export default function SignUpPage() {
         router.replace("/setup");
         return;
       }
-      setMessage("Account created. Check your email to confirm your account before signing in.");
+      setMessage("If confirmation is required, open the newest confirmation email to finish setup. If you already confirmed this account, sign in using the password you registered with.");
     } catch {
       setError("Unable to create your account right now. Check your connection and try again.");
     } finally {
