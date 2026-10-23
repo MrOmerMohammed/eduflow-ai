@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage(){
  const [email,setEmail]=useState(""); const [busy,setBusy]=useState(false); const [message,setMessage]=useState(""); const [error,setError]=useState("");
+ useEffect(()=>{if(new URLSearchParams(window.location.search).get("error")==="link_expired")setError("That recovery link has expired or was already used. Request a new link and open the latest email only.");},[]);
  async function submit(e:FormEvent){
   e.preventDefault();
   if(busy) return;
