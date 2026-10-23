@@ -67,7 +67,22 @@ declare
   v_name text; v_code text; v_email text; v_phone text; v_key text;
 begin
   if p_actor_user_id is null or p_school_id is null then raise exception 'Actor and school are required'; end if;
-  if not exists(select 1 from public.user_roles ur join public.roles ro on ro.id=ur.role_id where ur.user_id=p_actor_user_id and ur.school_id=p_school_id and ro.key in('admin','principal','vice_principal','organization_admin','super_admin')) then raise exception 'Insufficient permission'; end if;
+  if not exists (
+    select 1
+    from public.school_memberships sm
+    join public.schools s on s.id = sm.school_id
+    join public.user_roles ur on ur.user_id = sm.user_id and ur.school_id = sm.school_id
+    join public.roles ro on ro.id = ur.role_id
+    where sm.user_id = p_actor_user_id
+      and sm.school_id = p_school_id
+      and sm.status = 'active'
+      and sm.role = 'admin'
+      and s.status = 'active'
+      and ro.key = 'admin'
+      and ro.scope = 'school'
+  ) then
+    raise exception 'Insufficient permission';
+  end if;
   if jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows)=0 then raise exception 'Import rows are required'; end if;
 
   for r in select value from jsonb_array_elements(p_rows)
