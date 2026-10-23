@@ -52,7 +52,7 @@ function MarketingHome() {
         <div className="hero-proof"><span>✓ No payment required to start</span><span>✓ Role-based access</span><span>✓ Built for growing schools</span></div>
       </div>
       <div className="hero-panel marketing-dashboard-preview">
-        <div className="hero-panel-head"><span>EduFlow AI command center</span><b>Live workspace</b></div>
+        <div className="hero-panel-head"><span>EduFlow AI dashboard preview</span><b>Illustrative preview</b></div>
         <div className="preview-welcome"><span>Good morning</span><strong>School overview</strong><small>Everything important at a glance.</small></div>
         <div className="hero-metrics">
           <div><span>Students</span><strong>600+</strong><small>Active records</small></div>
